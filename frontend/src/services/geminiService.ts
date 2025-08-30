@@ -67,9 +67,14 @@ JSON形式で回答してください：
     
     const tones = ['プロフェッショナル', 'カジュアル', '教育的']
     const drafts: BlogDraft[] = []
+    const maxRetries = 2
     
     for (let i = 0; i < tones.length; i++) {
-      const prompt = `
+      let retryCount = 0
+      let success = false
+      
+      while (retryCount < maxRetries && !success) {
+        const prompt = `
 以下のブログアイデアに基づいて、${tones[i]}なトーンで記事の草案を作成してください。
 
 タイトル: ${idea.title}
@@ -81,7 +86,7 @@ JSON形式で回答してください：
 2. アウトライン（見出しのリスト）
 3. 本文（1500-2000文字）
 
-JSON形式で回答してください：
+必ずJSON形式で回答してください。JSONの前後に説明文を入れないでください：
 {
   "title": "記事タイトル",
   "outline": ["見出し1", "見出し2", "見出し3"],
@@ -89,31 +94,76 @@ JSON形式で回答してください：
   "tone": "${tones[i]}"
 }
 `
-      
-      try {
-        const result = await this.model.generateContent(prompt)
-        const response = await result.response
-        const text = response.text()
         
-        // Extract JSON from response
-        const jsonMatch = text.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-          const draft = JSON.parse(jsonMatch[0])
-          drafts.push({
-            id: `draft-${i + 1}`,
-            title: draft.title,
-            content: draft.content,
-            outline: draft.outline,
-            tone: draft.tone || tones[i]
-          })
+        try {
+          console.log(`Generating ${tones[i]} draft (attempt ${retryCount + 1})...`)
+          const result = await this.model.generateContent(prompt)
+          const response = await result.response
+          const text = response.text()
+          
+          // Try to extract JSON - be more flexible with the regex
+          let jsonStr = text
+          
+          // First, try to find JSON object
+          const jsonMatch = text.match(/\{[\s\S]*\}/)
+          if (jsonMatch) {
+            jsonStr = jsonMatch[0]
+          }
+          
+          // Clean up common issues
+          jsonStr = jsonStr
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .trim()
+          
+          try {
+            const draft = JSON.parse(jsonStr)
+            
+            // Validate required fields
+            if (!draft.title || !draft.content || !draft.outline) {
+              throw new Error('Missing required fields in draft')
+            }
+            
+            drafts.push({
+              id: `draft-${i + 1}`,
+              title: draft.title || `${tones[i]}な記事タイトル`,
+              content: draft.content || '',
+              outline: Array.isArray(draft.outline) ? draft.outline : [],
+              tone: draft.tone || tones[i]
+            })
+            success = true
+            console.log(`Successfully generated ${tones[i]} draft`)
+          } catch (parseError) {
+            console.error(`Failed to parse JSON for ${tones[i]} draft:`, parseError)
+            throw parseError
+          }
+        } catch (error) {
+          console.error(`Error generating ${tones[i]} draft (attempt ${retryCount + 1}):`, error)
+          retryCount++
+          
+          if (retryCount >= maxRetries) {
+            console.error(`Failed to generate ${tones[i]} draft after ${maxRetries} attempts`)
+            // Create a fallback draft instead of completely failing
+            drafts.push({
+              id: `draft-${i + 1}`,
+              title: `${idea.title}（${tones[i]}版）`,
+              content: `[${tones[i]}トーンの草案生成に失敗しました。再度お試しください。]`,
+              outline: ['はじめに', '本文', 'まとめ'],
+              tone: tones[i]
+            })
+            success = true // Move to next tone
+          } else {
+            // Wait a bit before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000))
+          }
         }
-      } catch (error) {
-        console.error(`Error generating draft ${i + 1}:`, error)
       }
     }
     
-    if (drafts.length === 0) {
-      throw new Error('Failed to generate any drafts')
+    // Check if we have at least one valid draft (not a fallback)
+    const validDrafts = drafts.filter(d => !d.content.includes('草案生成に失敗しました'))
+    if (validDrafts.length === 0) {
+      throw new Error('Failed to generate any valid drafts. Please check your API key and try again.')
     }
     
     return drafts
