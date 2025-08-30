@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { BlogIdea, BlogDraft } from '../stores/article'
+import { useArticleStore } from '../stores/article'
 
 class GeminiService {
   private genAI: GoogleGenerativeAI | null = null
@@ -12,6 +13,24 @@ class GeminiService {
   
   isInitialized(): boolean {
     return this.model !== null
+  }
+  
+  private getTextLengthRequirement(): string {
+    const articleStore = useArticleStore()
+    const textLength = articleStore.textLength
+    const customLength = articleStore.customTextLength
+    
+    if (textLength === 'custom' && customLength) {
+      return `約${customLength}文字`
+    } else if (textLength === '1000') {
+      return '約1000文字'
+    } else if (textLength === '2000-3000') {
+      return '2000-3000文字'
+    } else if (textLength === '4000-5000') {
+      return '4000-5000文字'
+    }
+    
+    return '1500-2000文字' // fallback
   }
   
   async generateIdeas(genre: string, theme: string): Promise<BlogIdea[]> {
@@ -48,7 +67,7 @@ JSON形式で回答してください：
       if (jsonMatch) {
         const ideas = JSON.parse(jsonMatch[0])
         return ideas.map((idea: any, index: number) => ({
-          id: `idea-${index + 1}`,
+          id: `idea-${Date.now()}-${index + 1}`,
           title: idea.title,
           description: idea.description,
           keywords: idea.keywords
@@ -58,6 +77,52 @@ JSON形式で回答してください：
       throw new Error('Failed to parse response')
     } catch (error) {
       console.error('Error generating ideas:', error)
+      throw error
+    }
+  }
+  
+  async generateSingleIdea(genre: string, theme: string, index: number): Promise<BlogIdea> {
+    if (!this.model) throw new Error('Gemini API not initialized')
+    
+    const prompt = `
+あなたはプロのブログライターです。以下のジャンルとテーマに基づいて、魅力的なブログ記事のアイデアを1つ提案してください。
+
+ジャンル: ${genre}
+テーマ: ${theme}
+
+アイデアには以下を含めてください：
+1. 記事タイトル
+2. 簡潔な説明（50-100文字）
+3. 関連キーワード（3-5個）
+
+JSON形式で回答してください：
+{
+  "title": "タイトル",
+  "description": "説明",
+  "keywords": ["キーワード1", "キーワード2", "キーワード3"]
+}
+`
+    
+    try {
+      const result = await this.model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+      
+      // Extract JSON from response
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        const idea = JSON.parse(jsonMatch[0])
+        return {
+          id: `idea-${Date.now()}-${index}`,
+          title: idea.title,
+          description: idea.description,
+          keywords: idea.keywords
+        }
+      }
+      
+      throw new Error('Failed to parse response')
+    } catch (error) {
+      console.error('Error generating single idea:', error)
       throw error
     }
   }
@@ -74,6 +139,7 @@ JSON形式で回答してください：
       let success = false
       
       while (retryCount < maxRetries && !success) {
+        const textLengthReq = this.getTextLengthRequirement()
         const prompt = `
 以下のブログアイデアに基づいて、${tones[i]}なトーンで記事の草案を作成してください。
 
@@ -84,7 +150,7 @@ JSON形式で回答してください：
 以下の構成で作成してください：
 1. 記事タイトル（キャッチーに改良可）
 2. アウトライン（見出しのリスト）
-3. 本文（1500-2000文字）
+3. 本文（${textLengthReq}）
 
 必ずJSON形式で回答してください。JSONの前後に説明文を入れないでください：
 {
@@ -169,6 +235,82 @@ JSON形式で回答してください：
     return drafts
   }
   
+  async generateSingleDraft(idea: BlogIdea, tone: string, index: number): Promise<BlogDraft> {
+    if (!this.model) throw new Error('Gemini API not initialized')
+    
+    const maxRetries = 2
+    let retryCount = 0
+    
+    while (retryCount < maxRetries) {
+      const textLengthReq = this.getTextLengthRequirement()
+      const prompt = `
+以下のブログアイデアに基づいて、${tone}なトーンで記事の草案を作成してください。
+
+タイトル: ${idea.title}
+説明: ${idea.description}
+キーワード: ${idea.keywords.join(', ')}
+
+以下の構成で作成してください：
+1. 記事タイトル（キャッチーに改良可）
+2. アウトライン（見出しのリスト）
+3. 本文（${textLengthReq}）
+
+必ずJSON形式で回答してください。JSONの前後に説明文を入れないでください：
+{
+  "title": "記事タイトル",
+  "outline": ["見出し1", "見出し2", "見出し3"],
+  "content": "本文",
+  "tone": "${tone}"
+}
+`
+      
+      try {
+        console.log(`Regenerating ${tone} draft (attempt ${retryCount + 1})...`)
+        const result = await this.model.generateContent(prompt)
+        const response = await result.response
+        const text = response.text()
+        
+        // Try to extract JSON
+        let jsonStr = text
+        const jsonMatch = text.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          jsonStr = jsonMatch[0]
+        }
+        
+        jsonStr = jsonStr
+          .replace(/```json/g, '')
+          .replace(/```/g, '')
+          .trim()
+        
+        const draft = JSON.parse(jsonStr)
+        
+        if (!draft.title || !draft.content || !draft.outline) {
+          throw new Error('Missing required fields in draft')
+        }
+        
+        console.log(`Successfully regenerated ${tone} draft`)
+        return {
+          id: `draft-${Date.now()}-${index}`,
+          title: draft.title || `${tone}な記事タイトル`,
+          content: draft.content || '',
+          outline: Array.isArray(draft.outline) ? draft.outline : [],
+          tone: draft.tone || tone
+        }
+      } catch (error) {
+        console.error(`Error regenerating ${tone} draft (attempt ${retryCount + 1}):`, error)
+        retryCount++
+        
+        if (retryCount >= maxRetries) {
+          throw new Error(`Failed to regenerate ${tone} draft after ${maxRetries} attempts`)
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+    }
+    
+    throw new Error(`Failed to regenerate ${tone} draft`)
+  }
+  
   async combineDrafts(drafts: BlogDraft[], instructions: string): Promise<string> {
     if (!this.model) throw new Error('Gemini API not initialized')
     
@@ -176,6 +318,7 @@ JSON形式で回答してください：
       `草案${index + 1}（${draft.tone}）:\n${draft.content}`
     ).join('\n\n---\n\n')
     
+    const textLengthReq = this.getTextLengthRequirement()
     const prompt = `
 以下の複数の草案を参考に、指示に従って1つの完成した記事を作成してください。
 
@@ -184,7 +327,7 @@ JSON形式で回答してください：
 草案:
 ${draftsText}
 
-完成した記事を作成してください（2000-3000文字）。見出しを適切に使用し、読みやすい構成にしてください。
+完成した記事を作成してください（${textLengthReq}）。見出しを適切に使用し、読みやすい構成にしてください。
 `
     
     try {

@@ -13,7 +13,8 @@
       <div
         v-for="(draft, index) in drafts"
         :key="draft.id"
-        class="border border-gray-300 dark:border-gray-600 rounded-lg p-4"
+        @click="viewDraftPreview(draft)"
+        class="border border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition"
       >
         <h3 class="font-semibold text-gray-800 dark:text-white mb-2">
           草案{{ index + 1 }}: {{ draft.tone }}
@@ -21,8 +22,13 @@
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
           {{ draft.title }}
         </p>
-        <div class="text-xs text-gray-500 dark:text-gray-500">
-          {{ Math.floor(draft.content.length / 100) * 100 }}文字程度
+        <div class="flex justify-between items-center">
+          <div class="text-xs text-gray-500 dark:text-gray-500">
+            {{ Math.floor(draft.content.length / 100) * 100 }}文字程度
+          </div>
+          <div class="text-xs text-blue-600 dark:text-blue-400">
+            クリックして全文表示
+          </div>
         </div>
       </div>
     </div>
@@ -77,8 +83,11 @@
     <!-- Final Article Preview -->
     <div v-else-if="finalContent" class="mb-6">
       <div class="border border-gray-300 dark:border-gray-600 rounded-lg">
-        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-300 dark:border-gray-600">
+        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-300 dark:border-gray-600 flex justify-between items-center">
           <h3 class="font-semibold text-gray-800 dark:text-white">完成した記事</h3>
+          <span class="text-sm text-gray-600 dark:text-gray-400">
+            {{ finalContent.length.toLocaleString() }}文字
+          </span>
         </div>
         
         <div class="p-4">
@@ -122,13 +131,14 @@
       </button>
     </div>
     
-    <!-- Initial State -->
-    <div v-else class="text-center py-8 mb-6">
+    <!-- Generate Article Button (Always visible when no content) -->
+    <div v-if="!finalContent" class="text-center py-8 mb-6">
       <button
         @click="combineArticle"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg text-lg"
+        :disabled="isLoading"
+        class="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-6 rounded-lg text-lg transition"
       >
-        記事をまとめる
+        記事を生成
       </button>
     </div>
     
@@ -158,9 +168,14 @@
       <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
         <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-white">
-              完成した記事
-            </h2>
+            <div>
+              <h2 class="text-xl font-bold text-gray-800 dark:text-white">
+                完成した記事
+              </h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {{ finalContent.length.toLocaleString() }}文字
+              </p>
+            </div>
             <button
               @click="viewFullArticle = false"
               class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -175,6 +190,58 @@
         <div class="p-6">
           <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">
             {{ finalContent }}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Draft Preview Modal -->
+    <div
+      v-if="viewingDraftPreview"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      @click.self="viewingDraftPreview = null"
+    >
+      <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-gray-800 dark:text-white">
+                {{ viewingDraftPreview.tone }}トーン: {{ viewingDraftPreview.title }}
+              </h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {{ Math.floor(viewingDraftPreview.content.length / 100) * 100 }}文字程度
+              </p>
+            </div>
+            <button
+              @click="viewingDraftPreview = null"
+              class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Outline -->
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-3">アウトライン</h3>
+          <ul class="list-disc list-inside space-y-2">
+            <li
+              v-for="(item, index) in viewingDraftPreview.outline"
+              :key="index"
+              class="text-gray-600 dark:text-gray-400"
+            >
+              {{ item }}
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-3">本文</h3>
+          <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">
+            {{ viewingDraftPreview.content }}
           </div>
         </div>
       </div>
@@ -197,17 +264,28 @@ const isLoading = ref(false)
 const error = ref('')
 const viewFullArticle = ref(false)
 const editArticle = ref(false)
+const viewingDraftPreview = ref<BlogDraft | null>(null)
 
 const instructionTemplates = [
-  {
-    id: 'balanced',
-    label: 'バランス重視',
-    text: '各草案の良い部分をバランス良く組み合わせて、読みやすい記事を作成してください'
-  },
   {
     id: 'professional',
     label: 'プロフェッショナル',
     text: 'プロフェッショナルなトーンを基調とし、信頼性の高い内容にしてください'
+  },
+  {
+    id: 'casual',
+    label: 'カジュアル',
+    text: 'カジュアルで親しみやすいトーンを重視し、読みやすい文体で作成してください'
+  },
+  {
+    id: 'educational',
+    label: '教育的',
+    text: '教育的な視点を重視し、学習効果の高い構成と説明を含めてください'
+  },
+  {
+    id: 'balanced',
+    label: 'バランス重視',
+    text: '各草案の良い部分をバランス良く組み合わせて、読みやすい記事を作成してください'
   },
   {
     id: 'practical',
@@ -223,6 +301,11 @@ const instructionTemplates = [
 
 const combineArticle = async () => {
   if (drafts.value.length === 0) return
+  
+  if (!geminiService.isInitialized()) {
+    error.value = 'Gemini APIキーが設定されていません。設定画面でAPIキーを設定してください。'
+    return
+  }
   
   isLoading.value = true
   error.value = ''
@@ -250,6 +333,10 @@ const combineArticle = async () => {
   }
 }
 
+const viewDraftPreview = (draft: BlogDraft) => {
+  viewingDraftPreview.value = draft
+}
+
 const extractTitle = (content: string): string | null => {
   const lines = content.split('\n')
   const titleLine = lines.find(line => line.trim().startsWith('#'))
@@ -262,9 +349,9 @@ const proceedToNext = () => {
 }
 
 onMounted(() => {
-  // Auto-combine if not already done
-  if (!finalContent.value && drafts.value.length > 0) {
-    combineArticle()
+  // Load existing final content if available
+  if (articleStore.finalArticle?.content) {
+    finalContent.value = articleStore.finalArticle.content
   }
 })
 </script>

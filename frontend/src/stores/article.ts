@@ -34,6 +34,8 @@ export const useArticleStore = defineStore('article', () => {
   
   // Step 2: Theme
   const selectedTheme = ref<string>('')
+  const textLength = ref<string>('2000-3000')
+  const customTextLength = ref<string>('')
   
   // Step 3: Ideas
   const generatedIdeas = ref<BlogIdea[]>([])
@@ -69,6 +71,8 @@ export const useArticleStore = defineStore('article', () => {
     currentStep.value = 1
     selectedGenre.value = ''
     selectedTheme.value = ''
+    textLength.value = '2000-3000'
+    customTextLength.value = ''
     generatedIdeas.value = []
     selectedIdea.value = null
     generatedDrafts.value = []
@@ -82,6 +86,13 @@ export const useArticleStore = defineStore('article', () => {
   
   const setTheme = (theme: string) => {
     selectedTheme.value = theme
+  }
+  
+  const setTextLength = (length: string, customLength?: string) => {
+    textLength.value = length
+    if (customLength) {
+      customTextLength.value = customLength
+    }
   }
   
   const setIdeas = (ideas: BlogIdea[]) => {
@@ -105,6 +116,8 @@ export const useArticleStore = defineStore('article', () => {
     currentStep,
     selectedGenre,
     selectedTheme,
+    textLength,
+    customTextLength,
     generatedIdeas,
     selectedIdea,
     generatedDrafts,
@@ -117,6 +130,7 @@ export const useArticleStore = defineStore('article', () => {
     resetWorkflow,
     setGenre,
     setTheme,
+    setTextLength,
     setIdeas,
     selectIdea,
     setDrafts,

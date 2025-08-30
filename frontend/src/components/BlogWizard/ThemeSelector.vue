@@ -50,6 +50,35 @@
           placeholder="例: 読者にリモートワークでの効率的な働き方を伝え、実践的なテクニックを提供する"
         />
       </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          記事の文字数 *
+        </label>
+        <select
+          v-model="textLength"
+          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+        >
+          <option value="1000">1000文字</option>
+          <option value="2000-3000">2000～3000文字</option>
+          <option value="4000-5000">4000～5000文字</option>
+          <option value="custom">カスタム</option>
+        </select>
+      </div>
+      
+      <div v-if="textLength === 'custom'">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          希望文字数
+        </label>
+        <input
+          v-model="customTextLength"
+          type="number"
+          min="500"
+          max="10000"
+          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+          placeholder="例: 3500"
+        />
+      </div>
     </div>
     
     <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
@@ -91,9 +120,17 @@ const selectedGenre = computed(() => articleStore.selectedGenre)
 const theme = ref(articleStore.selectedTheme || '')
 const targetAudience = ref('')
 const purpose = ref('')
+const textLength = ref(articleStore.textLength || '2000-3000')
+const customTextLength = ref(articleStore.customTextLength || '')
 
 const proceedToNext = () => {
   if (!theme.value.trim()) return
+  
+  // Validate custom text length if selected
+  if (textLength.value === 'custom' && (!customTextLength.value || customTextLength.value < 500)) {
+    alert('カスタム文字数を500文字以上で入力してください。')
+    return
+  }
   
   // Combine theme with additional context if provided
   let fullTheme = theme.value
@@ -105,6 +142,7 @@ const proceedToNext = () => {
   }
   
   articleStore.setTheme(fullTheme)
+  articleStore.setTextLength(textLength.value, customTextLength.value)
   emit('next')
 }
 </script>

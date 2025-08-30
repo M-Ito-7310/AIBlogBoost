@@ -40,10 +40,25 @@
         :key="draft.id"
         class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden"
       >
-        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-300 dark:border-gray-600">
+        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-300 dark:border-gray-600 flex justify-between items-center">
           <h3 class="font-semibold text-gray-800 dark:text-white">
             {{ draft.tone }}トーン: {{ draft.title }}
           </h3>
+          <button
+            @click="regenerateSingleDraft(draft.tone, drafts.indexOf(draft))"
+            :disabled="isRegeneratingDraft === drafts.indexOf(draft)"
+            class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 disabled:opacity-50"
+            title="この草案を再生成"
+          >
+            <svg v-if="isRegeneratingDraft !== drafts.indexOf(draft)" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <div v-else class="animate-spin">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+          </button>
         </div>
         
         <div class="p-4">
@@ -80,9 +95,9 @@
       
       <button
         @click="generateDrafts"
-        class="w-full text-center text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold py-2"
+        class="w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
       >
-        草案を再生成
+        すべて再生成
       </button>
     </div>
     
@@ -158,12 +173,18 @@ const articleStore = useArticleStore()
 const selectedIdea = computed(() => articleStore.selectedIdea)
 const drafts = ref<BlogDraft[]>(articleStore.generatedDrafts || [])
 const isLoading = ref(false)
+const isRegeneratingDraft = ref<number | null>(null)
 const error = ref('')
 const loadingMessage = ref('プロフェッショナルトーンで作成中...')
 const viewingDraft = ref<BlogDraft | null>(null)
 
 const generateDrafts = async () => {
   if (!selectedIdea.value) return
+  
+  if (!geminiService.isInitialized()) {
+    error.value = 'Gemini APIキーが設定されていません。設定画面でAPIキーを設定してください。'
+    return
+  }
   
   isLoading.value = true
   error.value = ''
@@ -190,6 +211,35 @@ const generateDrafts = async () => {
   } finally {
     clearInterval(interval)
     isLoading.value = false
+  }
+}
+
+const regenerateSingleDraft = async (tone: string, index: number) => {
+  if (!selectedIdea.value) return
+  
+  if (!geminiService.isInitialized()) {
+    error.value = 'Gemini APIキーが設定されていません。設定画面でAPIキーを設定してください。'
+    return
+  }
+  
+  isRegeneratingDraft.value = index
+  error.value = ''
+  
+  try {
+    const newDraft = await geminiService.generateSingleDraft(
+      selectedIdea.value,
+      tone,
+      index + 1
+    )
+    
+    // Replace the draft at the specific index
+    drafts.value[index] = newDraft
+    articleStore.setDrafts([...drafts.value])
+  } catch (err) {
+    error.value = `${tone}草案の再生成に失敗しました。`
+    console.error(err)
+  } finally {
+    isRegeneratingDraft.value = null
   }
 }
 
