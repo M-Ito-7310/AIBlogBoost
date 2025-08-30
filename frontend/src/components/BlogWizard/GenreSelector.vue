@@ -24,15 +24,16 @@
       </button>
     </div>
     
-    <div v-if="selectedGenre" class="mb-6">
+    <div v-if="selectedGenre === 'other'" class="mb-6">
       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        カスタムジャンル（オプション）
+        カスタムジャンル *
       </label>
       <input
         v-model="customGenre"
         type="text"
         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-        placeholder="例: スポーツ、料理、旅行など"
+        placeholder="例: スポーツ、料理、ペットなど"
+        required
       />
     </div>
     
@@ -47,7 +48,7 @@
       
       <button
         @click="proceedToNext"
-        :disabled="!selectedGenre"
+        :disabled="!selectedGenre || (selectedGenre === 'other' && !customGenre.trim())"
         class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg transition"
       >
         次へ
@@ -141,11 +142,21 @@ onMounted(() => {
 
 const selectGenre = (genre: typeof genres[0]) => {
   selectedGenre.value = genre.id
+  // Clear custom genre when selecting a different genre
+  if (genre.id !== 'other') {
+    customGenre.value = ''
+  }
 }
 
 const proceedToNext = () => {
   if (!selectedGenre.value) {
     alert('ジャンルを選択してください')
+    return
+  }
+  
+  // Validate custom genre input when "other" is selected
+  if (selectedGenre.value === 'other' && !customGenre.value.trim()) {
+    alert('カスタムジャンルを入力してください')
     return
   }
   
