@@ -1,0 +1,19 @@
+{
+  "name": "aiblogboost",
+  "version": "1.0.0",
+  "description": "AI-powered blog article creation assistant tool",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview",
+    "install-deps": "cd frontend && npm install",
+    "setup": "npm run install-deps"
+  },
+  "keywords": ["ai", "blog", "content-creation", "vue", "typescript", "gemini"],
+  "author": "M-Ito-7310",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/M-Ito-7310/AIBlogBoost.git"
+  }
+}
