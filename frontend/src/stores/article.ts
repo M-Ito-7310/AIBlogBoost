@@ -109,6 +109,71 @@ export const useArticleStore = defineStore('article', () => {
   
   const setFinalArticle = (article: BlogArticle) => {
     finalArticle.value = article
+    // Clear cache when article is finalized as it will be saved to history
+    clearCache()
+  }
+  
+  // Cache management
+  const CACHE_KEY = 'aibl_temp_article'
+  
+  const saveToCache = () => {
+    const cacheData = {
+      currentStep: currentStep.value,
+      selectedGenre: selectedGenre.value,
+      selectedTheme: selectedTheme.value,
+      textLength: textLength.value,
+      customTextLength: customTextLength.value,
+      generatedIdeas: generatedIdeas.value,
+      selectedIdea: selectedIdea.value,
+      generatedDrafts: generatedDrafts.value,
+      finalArticle: finalArticle.value,
+      timestamp: Date.now()
+    }
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData))
+  }
+  
+  const loadFromCache = () => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY)
+      if (cached) {
+        const data = JSON.parse(cached)
+        currentStep.value = data.currentStep || 1
+        selectedGenre.value = data.selectedGenre || ''
+        selectedTheme.value = data.selectedTheme || ''
+        textLength.value = data.textLength || '2000-3000'
+        customTextLength.value = data.customTextLength || ''
+        generatedIdeas.value = data.generatedIdeas || []
+        selectedIdea.value = data.selectedIdea || null
+        generatedDrafts.value = data.generatedDrafts || []
+        finalArticle.value = data.finalArticle || null
+        return true
+      }
+    } catch (error) {
+      console.error('Failed to load cached article:', error)
+    }
+    return false
+  }
+  
+  const clearCache = () => {
+    localStorage.removeItem(CACHE_KEY)
+  }
+  
+  const hasCachedData = () => {
+    return localStorage.getItem(CACHE_KEY) !== null
+  }
+  
+  const hasProgressData = () => {
+    // Don't save if already at Step 6 (Export) - it should be saved to history instead
+    if (currentStep.value >= 6) {
+      return false
+    }
+    
+    return currentStep.value > 1 || 
+           selectedGenre.value !== '' || 
+           selectedTheme.value !== '' ||
+           generatedIdeas.value.length > 0 ||
+           generatedDrafts.value.length > 0 ||
+           finalArticle.value !== null
   }
   
   return {
@@ -134,6 +199,13 @@ export const useArticleStore = defineStore('article', () => {
     setIdeas,
     selectIdea,
     setDrafts,
-    setFinalArticle
+    setFinalArticle,
+    
+    // Cache actions
+    saveToCache,
+    loadFromCache,
+    clearCache,
+    hasCachedData,
+    hasProgressData
   }
 })

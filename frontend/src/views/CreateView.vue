@@ -55,9 +55,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, watch, nextTick } from 'vue'
+import { computed, defineAsyncComponent, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useArticleStore } from '../stores/article'
 import { useRouter } from 'vue-router'
+import { onBeforeRouteLeave } from 'vue-router'
 
 const articleStore = useArticleStore()
 const router = useRouter()
@@ -102,9 +103,38 @@ const previousStep = () => {
 
 const resetWorkflow = () => {
   if (confirm('作成中の内容をリセットしてもよろしいですか？')) {
+    articleStore.clearCache()
     articleStore.resetWorkflow()
   }
 }
+
+// Load cached data on mount
+onMounted(() => {
+  if (articleStore.hasCachedData()) {
+    const confirmLoad = confirm('保存された作成途中の記事があります。続きから作成しますか？')
+    if (confirmLoad) {
+      articleStore.loadFromCache()
+    } else {
+      articleStore.clearCache()
+      articleStore.resetWorkflow()
+    }
+  }
+})
+
+// Handle navigation away from create page
+onBeforeRouteLeave((to, from, next) => {
+  if (articleStore.hasProgressData()) {
+    const confirmSave = confirm('作成中の記事を一時保存しますか？\n\n「OK」: 保存して遷移\n「キャンセル」: 保存せずに遷移')
+    
+    if (confirmSave) {
+      articleStore.saveToCache()
+    } else {
+      articleStore.clearCache()
+      articleStore.resetWorkflow()
+    }
+  }
+  next()
+})
 
 // Scroll to top when step changes
 watch(currentStep, async () => {
