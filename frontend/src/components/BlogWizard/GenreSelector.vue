@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useArticleStore } from '../../stores/article'
 
 const emit = defineEmits(['next', 'previous'])
@@ -120,14 +120,35 @@ const genres = [
   }
 ]
 
-const selectedGenre = ref(articleStore.selectedGenre || '')
+const selectedGenre = ref('')
 const customGenre = ref('')
+
+// Initialize selection state when component mounts
+onMounted(() => {
+  const storedGenre = articleStore.selectedGenre
+  if (storedGenre) {
+    // Check if stored genre matches one of our predefined genres
+    const matchingGenre = genres.find(g => g.name === storedGenre || g.id === storedGenre)
+    if (matchingGenre) {
+      selectedGenre.value = matchingGenre.id
+    } else {
+      // It's a custom genre, set "other" as selected and put the custom text
+      selectedGenre.value = 'other'
+      customGenre.value = storedGenre
+    }
+  }
+})
 
 const selectGenre = (genre: typeof genres[0]) => {
   selectedGenre.value = genre.id
 }
 
 const proceedToNext = () => {
+  if (!selectedGenre.value) {
+    alert('ジャンルを選択してください')
+    return
+  }
+  
   const finalGenre = customGenre.value || 
     genres.find(g => g.id === selectedGenre.value)?.name || 
     selectedGenre.value

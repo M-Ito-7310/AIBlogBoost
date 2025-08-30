@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, defineAsyncComponent, watch, nextTick } from 'vue'
 import { useArticleStore } from '../stores/article'
 import { useRouter } from 'vue-router'
 
@@ -105,4 +105,10 @@ const resetWorkflow = () => {
     articleStore.resetWorkflow()
   }
 }
+
+// Scroll to top when step changes
+watch(currentStep, async () => {
+  await nextTick()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+})
 </script>
