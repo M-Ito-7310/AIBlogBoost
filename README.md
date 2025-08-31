@@ -15,11 +15,11 @@ AIBlogBoost is a frontend-only SPA that leverages Google Gemini AI to assist in 
 ## Features
 
 ### 🎯 **6-Step Article Creation Workflow**
-1. **Genre Selection** - Choose from business, technology, lifestyle, and more
-2. **Theme Definition** - Specify your article topic and target audience
-3. **AI Idea Generation** - Get 5 creative article ideas powered by Gemini AI
-4. **Multi-tone Draft Creation** - Generate 3 drafts in different tones (professional, casual, educational)
-5. **Intelligent Combination** - Merge the best parts of all drafts into one cohesive article
+1. **Genre Selection** - Choose from 9 predefined genres or create custom categories
+2. **Theme Definition** - Specify your article topic, target audience, and desired word count
+3. **AI Idea Generation** - Get 5 creative article ideas with individual regeneration options
+4. **Multi-tone Draft Creation** - Generate 3 drafts in different tones with preview capabilities
+5. **Intelligent Combination** - Merge the best parts of all drafts with custom instructions
 6. **Export & Save** - Download in multiple formats and save to local history
 
 ### ⚡ **AI-Powered Features**
@@ -27,12 +27,16 @@ AIBlogBoost is a frontend-only SPA that leverages Google Gemini AI to assist in 
 - Context-aware article suggestions based on genre and theme
 - Multiple writing tone options for diverse content styles
 - Intelligent content combination with user-specified instructions
+- Individual idea and draft regeneration for iterative improvement
+- Customizable word count settings (1000, 2000-3000, 4000-5000, or custom)
 
 ### 📱 **Modern User Experience**
 - **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
 - **Dark/Light Theme** - Automatic theme switching with system preference detection
-- **Progressive UI** - Step-by-step wizard with progress tracking
+- **Progressive UI** - Step-by-step wizard with progress tracking and smooth scroll navigation
 - **Local Data Persistence** - Save articles and settings in browser storage
+- **Auto-Save & Recovery** - Automatic draft saving with navigation confirmation
+- **Enhanced Controls** - Individual draft regeneration and custom genre validation
 
 ### 📄 **Export & Management**
 - **Multiple Export Formats**: Markdown, HTML, Plain Text
