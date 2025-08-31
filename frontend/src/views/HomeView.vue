@@ -52,7 +52,28 @@
           </div>
         </div>
         
-        <div class="text-center mt-16">
+        <!-- Gemini API Data Usage Notice -->
+        <div class="w-full mt-12 mb-8">
+          <div class="glass-card rounded-2xl p-8 border border-accent-200/30 dark:border-accent-700/30 bg-accent-50/30 dark:bg-accent-900/20">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0">
+                <svg class="w-7 h-7 text-surface-700 dark:text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="text-left">
+                <p class="font-display font-semibold text-surface-800 dark:text-accent-300 mb-3 text-lg">
+                  AI処理に関する重要な情報
+                </p>
+                <p class="font-serif text-surface-700 dark:text-accent-400 text-base leading-relaxed">
+                  このアプリはGoogle Gemini APIの無料版を使用しており、入力されたテキストがGoogleのAI改善に使用される場合があります。機密情報の入力は控えてください。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-center mt-8">
           <button
             @click="startCreating"
             class="btn-primary text-xl py-6 px-12 mb-6 relative overflow-hidden group"
