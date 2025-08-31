@@ -26,7 +26,7 @@
         <p class="subtitle-editorial text-xl lg:text-2xl mb-4 max-w-2xl mx-auto">
           AIの力で魅力的なブログ記事を簡単作成
         </p>
-        <p class="font-serif text-surface-500 dark:text-surface-400 text-lg max-w-xl mx-auto leading-relaxed">
+        <p class="font-serif text-surface-500 dark:text-surface-400 text-lg w-full mx-auto leading-relaxed">
           直感的な6ステップウィザードで、高品質なコンテンツをあなたの手で。
         </p>
       </div>
