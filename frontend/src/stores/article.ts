@@ -8,6 +8,11 @@ export interface BlogIdea {
   keywords: string[]
 }
 
+export interface SelectedIdea {
+  idea: BlogIdea
+  priority: number
+}
+
 export interface BlogDraft {
   id: string
   title: string
@@ -39,7 +44,7 @@ export const useArticleStore = defineStore('article', () => {
   
   // Step 3: Ideas
   const generatedIdeas = ref<BlogIdea[]>([])
-  const selectedIdea = ref<BlogIdea | null>(null)
+  const selectedIdeas = ref<SelectedIdea[]>([])
   
   // Step 4: Drafts
   const generatedDrafts = ref<BlogDraft[]>([])
@@ -74,7 +79,7 @@ export const useArticleStore = defineStore('article', () => {
     textLength.value = '2000-3000'
     customTextLength.value = ''
     generatedIdeas.value = []
-    selectedIdea.value = null
+    selectedIdeas.value = []
     generatedDrafts.value = []
     finalArticle.value = null
   }
@@ -99,8 +104,8 @@ export const useArticleStore = defineStore('article', () => {
     generatedIdeas.value = ideas
   }
   
-  const selectIdea = (idea: BlogIdea) => {
-    selectedIdea.value = idea
+  const selectIdeas = (ideas: SelectedIdea[]) => {
+    selectedIdeas.value = ideas
   }
   
   const setDrafts = (drafts: BlogDraft[]) => {
@@ -124,7 +129,7 @@ export const useArticleStore = defineStore('article', () => {
       textLength: textLength.value,
       customTextLength: customTextLength.value,
       generatedIdeas: generatedIdeas.value,
-      selectedIdea: selectedIdea.value,
+      selectedIdeas: selectedIdeas.value,
       generatedDrafts: generatedDrafts.value,
       finalArticle: finalArticle.value,
       timestamp: Date.now()
@@ -143,7 +148,7 @@ export const useArticleStore = defineStore('article', () => {
         textLength.value = data.textLength || '2000-3000'
         customTextLength.value = data.customTextLength || ''
         generatedIdeas.value = data.generatedIdeas || []
-        selectedIdea.value = data.selectedIdea || null
+        selectedIdeas.value = data.selectedIdeas || []
         generatedDrafts.value = data.generatedDrafts || []
         finalArticle.value = data.finalArticle || null
         return true
@@ -172,6 +177,7 @@ export const useArticleStore = defineStore('article', () => {
            selectedGenre.value !== '' || 
            selectedTheme.value !== '' ||
            generatedIdeas.value.length > 0 ||
+           selectedIdeas.value.length > 0 ||
            generatedDrafts.value.length > 0 ||
            finalArticle.value !== null
   }
@@ -184,7 +190,7 @@ export const useArticleStore = defineStore('article', () => {
     textLength,
     customTextLength,
     generatedIdeas,
-    selectedIdea,
+    selectedIdeas,
     generatedDrafts,
     finalArticle,
     
@@ -197,7 +203,7 @@ export const useArticleStore = defineStore('article', () => {
     setTheme,
     setTextLength,
     setIdeas,
-    selectIdea,
+    selectIdeas,
     setDrafts,
     setFinalArticle,
     

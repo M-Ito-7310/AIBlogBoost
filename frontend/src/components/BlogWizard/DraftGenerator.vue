@@ -5,11 +5,20 @@
     </h2>
     
     <div class="mb-6">
-      <p class="text-gray-600 dark:text-gray-300 mb-2">
-        選択したアイデア: <span class="font-semibold">{{ selectedIdea?.title }}</span>
-      </p>
+      <div v-if="selectedIdeas.length > 0" class="mb-4">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-3">選択されたアイデア ({{ selectedIdeas.length }}個)</h3>
+        <div class="space-y-2">
+          <div v-for="selected in selectedIdeasSorted" :key="selected.idea.id" class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <span class="text-sm font-bold px-2 py-1 bg-blue-600 text-white rounded">{{ selected.priority }}</span>
+            <div>
+              <p class="font-medium text-gray-800 dark:text-white">{{ selected.idea.title }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">{{ selected.idea.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
       <p class="text-sm text-gray-500 dark:text-gray-400">
-        3つの異なるトーン（プロフェッショナル、カジュアル、教育的）で草案を生成します。
+        選択されたアイデアを組み合わせて、3つの異なるトーン（プロフェッショナル、カジュアル、教育的）で草案を生成します。
       </p>
     </div>
     
@@ -170,7 +179,10 @@ import type { BlogDraft } from '../../stores/article'
 const emit = defineEmits(['next', 'previous'])
 const articleStore = useArticleStore()
 
-const selectedIdea = computed(() => articleStore.selectedIdea)
+const selectedIdeas = computed(() => articleStore.selectedIdeas)
+const selectedIdeasSorted = computed(() => {
+  return [...selectedIdeas.value].sort((a, b) => a.priority - b.priority)
+})
 const drafts = ref<BlogDraft[]>(articleStore.generatedDrafts || [])
 const isLoading = ref(false)
 const isRegeneratingDraft = ref<number | null>(null)
@@ -179,7 +191,7 @@ const loadingMessage = ref('プロフェッショナルトーンで作成中...'
 const viewingDraft = ref<BlogDraft | null>(null)
 
 const generateDrafts = async () => {
-  if (!selectedIdea.value) return
+  if (selectedIdeas.value.length === 0) return
   
   if (!geminiService.isInitialized()) {
     error.value = 'Gemini APIキーが設定されていません。設定画面でAPIキーを設定してください。'
@@ -202,7 +214,7 @@ const generateDrafts = async () => {
   }, 3000)
   
   try {
-    const generatedDrafts = await geminiService.generateDrafts(selectedIdea.value)
+    const generatedDrafts = await geminiService.generateDraftsFromMultipleIdeas(selectedIdeasSorted.value)
     drafts.value = generatedDrafts
     articleStore.setDrafts(generatedDrafts)
   } catch (err) {
@@ -215,7 +227,7 @@ const generateDrafts = async () => {
 }
 
 const regenerateSingleDraft = async (tone: string, index: number) => {
-  if (!selectedIdea.value) return
+  if (selectedIdeas.value.length === 0) return
   
   if (!geminiService.isInitialized()) {
     error.value = 'Gemini APIキーが設定されていません。設定画面でAPIキーを設定してください。'
@@ -226,8 +238,8 @@ const regenerateSingleDraft = async (tone: string, index: number) => {
   error.value = ''
   
   try {
-    const newDraft = await geminiService.generateSingleDraft(
-      selectedIdea.value,
+    const newDraft = await geminiService.generateSingleDraftFromMultipleIdeas(
+      selectedIdeasSorted.value,
       tone,
       index + 1
     )
@@ -253,7 +265,7 @@ const proceedToNext = () => {
 }
 
 onMounted(() => {
-  if (drafts.value.length === 0 && selectedIdea.value) {
+  if (drafts.value.length === 0 && selectedIdeas.value.length > 0) {
     generateDrafts()
   }
 })

@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import type { BlogIdea, BlogDraft } from '../stores/article'
+import type { BlogIdea, BlogDraft, SelectedIdea } from '../stores/article'
 import { useArticleStore } from '../stores/article'
 
 class GeminiService {
@@ -128,11 +128,22 @@ JSON形式で回答してください：
   }
   
   async generateDrafts(idea: BlogIdea): Promise<BlogDraft[]> {
+    // Legacy single idea support
+    const selectedIdeas: SelectedIdea[] = [{ idea, priority: 1 }]
+    return this.generateDraftsFromMultipleIdeas(selectedIdeas)
+  }
+  
+  async generateDraftsFromMultipleIdeas(selectedIdeas: SelectedIdea[]): Promise<BlogDraft[]> {
     if (!this.model) throw new Error('Gemini API not initialized')
     
     const tones = ['プロフェッショナル', 'カジュアル', '教育的']
     const drafts: BlogDraft[] = []
     const maxRetries = 2
+    
+    // Create combined ideas context
+    const ideasContext = selectedIdeas.map(selected => 
+      `優先度${selected.priority}: ${selected.idea.title} - ${selected.idea.description} (キーワード: ${selected.idea.keywords.join(', ')})`
+    ).join('\n')
     
     for (let i = 0; i < tones.length; i++) {
       let retryCount = 0
@@ -141,11 +152,10 @@ JSON形式で回答してください：
       while (retryCount < maxRetries && !success) {
         const textLengthReq = this.getTextLengthRequirement()
         const prompt = `
-以下のブログアイデアに基づいて、${tones[i]}なトーンで記事の草案を作成してください。
+以下の複数のブログアイデアを組み合わせて、${tones[i]}なトーンで記事の草案を作成してください。
 
-タイトル: ${idea.title}
-説明: ${idea.description}
-キーワード: ${idea.keywords.join(', ')}
+選択されたアイデア（優先度順）:
+${ideasContext}
 
 以下の構成で作成してください：
 1. 記事タイトル（キャッチーに改良可）
@@ -191,7 +201,7 @@ JSON形式で回答してください：
             }
             
             drafts.push({
-              id: `draft-${i + 1}`,
+              id: `draft-${Date.now()}-${i + 1}`,
               title: draft.title || `${tones[i]}な記事タイトル`,
               content: draft.content || '',
               outline: Array.isArray(draft.outline) ? draft.outline : [],
@@ -211,8 +221,8 @@ JSON形式で回答してください：
             console.error(`Failed to generate ${tones[i]} draft after ${maxRetries} attempts`)
             // Create a fallback draft instead of completely failing
             drafts.push({
-              id: `draft-${i + 1}`,
-              title: `${idea.title}（${tones[i]}版）`,
+              id: `draft-${Date.now()}-${i + 1}`,
+              title: `複数アイデア組み合わせ記事（${tones[i]}版）`,
               content: `[${tones[i]}トーンの草案生成に失敗しました。再度お試しください。]`,
               outline: ['はじめに', '本文', 'まとめ'],
               tone: tones[i]
@@ -236,19 +246,29 @@ JSON形式で回答してください：
   }
   
   async generateSingleDraft(idea: BlogIdea, tone: string, index: number): Promise<BlogDraft> {
+    // Legacy single idea support
+    const selectedIdeas: SelectedIdea[] = [{ idea, priority: 1 }]
+    return this.generateSingleDraftFromMultipleIdeas(selectedIdeas, tone, index)
+  }
+  
+  async generateSingleDraftFromMultipleIdeas(selectedIdeas: SelectedIdea[], tone: string, index: number): Promise<BlogDraft> {
     if (!this.model) throw new Error('Gemini API not initialized')
     
     const maxRetries = 2
     let retryCount = 0
     
+    // Create combined ideas context
+    const ideasContext = selectedIdeas.map(selected => 
+      `優先度${selected.priority}: ${selected.idea.title} - ${selected.idea.description} (キーワード: ${selected.idea.keywords.join(', ')})`
+    ).join('\n')
+    
     while (retryCount < maxRetries) {
       const textLengthReq = this.getTextLengthRequirement()
       const prompt = `
-以下のブログアイデアに基づいて、${tone}なトーンで記事の草案を作成してください。
+以下の複数のブログアイデアを組み合わせて、${tone}なトーンで記事の草案を作成してください。
 
-タイトル: ${idea.title}
-説明: ${idea.description}
-キーワード: ${idea.keywords.join(', ')}
+選択されたアイデア（優先度順）:
+${ideasContext}
 
 以下の構成で作成してください：
 1. 記事タイトル（キャッチーに改良可）
