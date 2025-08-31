@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="min-h-screen bg-organic dark:bg-organic-dark relative overflow-hidden">
+  <div id="app" class="min-h-screen relative overflow-hidden" :style="backgroundStyle">
     <!-- Floating Background Elements -->
     <div class="floating-blob w-96 h-96 bg-gradient-to-br from-primary-300/40 to-accent-300/40 top-10 -right-20 animate-blob"></div>
     <div class="floating-blob w-80 h-80 bg-gradient-to-br from-mint-300/30 to-primary-300/30 top-1/2 -left-16 animate-blob" style="animation-delay: -2s;"></div>
@@ -191,6 +191,22 @@ const mobileMenuOpen = ref(false)
 
 const isDarkMode = computed(() => settingsStore.isDarkMode)
 const isApiKeyConfigured = computed(() => settingsStore.isApiKeyConfigured)
+
+const backgroundStyle = computed(() => {
+  if (isDarkMode.value) {
+    return {
+      background: 'linear-gradient(135deg, #1c1917 0%, #312e81 25%, #831843 50%, #065f46 75%, #1f2937 100%)',
+      backgroundSize: '400% 400%',
+      animation: 'gradient 15s ease infinite'
+    }
+  } else {
+    return {
+      background: 'linear-gradient(135deg, #fafaf9 0%, #f3f4f6 25%, #ede9fe 50%, #fdf2f8 75%, #ecfdf5 100%)',
+      backgroundSize: '400% 400%',
+      animation: 'gradient 15s ease infinite'
+    }
+  }
+})
 
 const toggleTheme = () => {
   settingsStore.toggleTheme()
