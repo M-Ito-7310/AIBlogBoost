@@ -168,11 +168,6 @@ export const useArticleStore = defineStore('article', () => {
   }
   
   const hasProgressData = () => {
-    // Don't save if already at Step 6 (Export) - it should be saved to history instead
-    if (currentStep.value >= 6) {
-      return false
-    }
-    
     return currentStep.value > 1 || 
            selectedGenre.value !== '' || 
            selectedTheme.value !== '' ||

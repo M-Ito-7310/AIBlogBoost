@@ -111,19 +111,10 @@ const resetWorkflow = () => {
 // Load cached data on mount
 onMounted(() => {
   if (articleStore.hasCachedData()) {
-    articleStore.loadFromCache()
-    
-    // If we're at Step 6, it means the article was already exported
-    // Reset the workflow to start fresh
-    if (articleStore.currentStep >= 6) {
-      articleStore.clearCache()
-      articleStore.resetWorkflow()
-      return
-    }
-    
-    // For other steps, ask if they want to continue
     const confirmLoad = confirm('保存された作成途中の記事があります。続きから作成しますか？')
-    if (!confirmLoad) {
+    if (confirmLoad) {
+      articleStore.loadFromCache()
+    } else {
       articleStore.clearCache()
       articleStore.resetWorkflow()
     }
@@ -132,6 +123,16 @@ onMounted(() => {
 
 // Handle navigation away from create page
 onBeforeRouteLeave((to, from, next) => {
+  // If at Step 6 (Export), show special message and clear cache
+  if (articleStore.currentStep >= 6) {
+    alert('エクスポートされた記事は履歴から確認してください。')
+    articleStore.clearCache()
+    articleStore.resetWorkflow()
+    next()
+    return
+  }
+  
+  // For other steps, handle normal save/cancel flow
   if (articleStore.hasProgressData()) {
     const confirmSave = confirm('作成中の記事を一時保存しますか？\n\n「OK」: 保存して遷移\n「キャンセル」: 保存せずに遷移')
     
