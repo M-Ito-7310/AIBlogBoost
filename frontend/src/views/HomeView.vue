@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen relative">
+  <div class="min-h-screen relative bg-transparent">
     <!-- Hero Section -->
     <div class="container mx-auto px-4 py-20 relative z-10">
       <div class="text-center mb-16">

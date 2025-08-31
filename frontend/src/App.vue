@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="min-h-screen relative overflow-hidden" :style="backgroundStyle">
+  <div id="app" class="min-h-screen relative overflow-hidden">
     <!-- Floating Background Elements -->
     <div class="floating-blob w-96 h-96 bg-gradient-to-br from-primary-300/40 to-accent-300/40 top-10 -right-20 animate-blob"></div>
     <div class="floating-blob w-80 h-80 bg-gradient-to-br from-mint-300/30 to-primary-300/30 top-1/2 -left-16 animate-blob" style="animation-delay: -2s;"></div>
@@ -192,21 +192,7 @@ const mobileMenuOpen = ref(false)
 const isDarkMode = computed(() => settingsStore.isDarkMode)
 const isApiKeyConfigured = computed(() => settingsStore.isApiKeyConfigured)
 
-const backgroundStyle = computed(() => {
-  if (isDarkMode.value) {
-    return {
-      background: 'linear-gradient(135deg, #1c1917 0%, #312e81 25%, #831843 50%, #065f46 75%, #1f2937 100%)',
-      backgroundSize: '400% 400%',
-      animation: 'gradient 15s ease infinite'
-    }
-  } else {
-    return {
-      background: 'linear-gradient(135deg, #fafaf9 0%, #f3f4f6 25%, #ede9fe 50%, #fdf2f8 75%, #ecfdf5 100%)',
-      backgroundSize: '400% 400%',
-      animation: 'gradient 15s ease infinite'
-    }
-  }
-})
+// Background styles moved to CSS classes for better performance
 
 const toggleTheme = () => {
   settingsStore.toggleTheme()
@@ -221,14 +207,38 @@ const toggleTheme = () => {
   min-height: 100vh;
 }
 
+/* Light mode background */
+:root:not(.dark) #app {
+  background: linear-gradient(135deg, #f5f5f4 0%, #e5e7eb 25%, #ddd6fe 50%, #fce7f3 75%, #d1fae5 100%);
+  background-size: 400% 400%;
+  animation: gradient-move 15s ease infinite;
+}
+
+/* Dark mode background */
+:root.dark #app {
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #0e4b99 100%);
+  background-size: 400% 400%;
+  animation: gradient-move 15s ease infinite;
+}
+
 main {
   flex: 1;
   position: relative;
   z-index: 5;
+  background: transparent;
 }
 
 /* Smooth transitions for route changes */
 .router-link-active {
   transition: all 0.3s ease;
+}
+
+@keyframes gradient-move {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 </style>
