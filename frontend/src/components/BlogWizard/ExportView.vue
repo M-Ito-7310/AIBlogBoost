@@ -255,6 +255,9 @@ const saveToHistory = () => {
   historyStore.addArticle(finalArticle.value)
   isSaved.value = true
   showSuccess('記事を履歴に保存しました')
+  
+  // Clear cache after saving to history
+  articleStore.clearCache()
 }
 
 const createAnother = () => {

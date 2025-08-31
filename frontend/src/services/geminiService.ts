@@ -33,6 +33,25 @@ class GeminiService {
     return '1500-2000文字' // fallback
   }
   
+  private getTargetWordCount(): { min: number; max: number } {
+    const articleStore = useArticleStore()
+    const textLength = articleStore.textLength
+    const customLength = articleStore.customTextLength
+    
+    if (textLength === 'custom' && customLength) {
+      const num = parseInt(customLength)
+      return { min: Math.floor(num * 0.9), max: Math.ceil(num * 1.1) }
+    } else if (textLength === '1000') {
+      return { min: 900, max: 1100 }
+    } else if (textLength === '2000-3000') {
+      return { min: 2000, max: 3000 }
+    } else if (textLength === '4000-5000') {
+      return { min: 4000, max: 5000 }
+    }
+    
+    return { min: 1500, max: 2000 } // fallback
+  }
+  
   async generateIdeas(genre: string, theme: string): Promise<BlogIdea[]> {
     if (!this.model) throw new Error('Gemini API not initialized')
     
@@ -339,7 +358,12 @@ ${ideasContext}
     ).join('\n\n---\n\n')
     
     const textLengthReq = this.getTextLengthRequirement()
-    const prompt = `
+    const targetLength = this.getTargetWordCount()
+    const maxRetries = 2
+    let retryCount = 0
+    
+    while (retryCount < maxRetries) {
+      const prompt = `
 以下の複数の草案を参考に、指示に従って1つの完成した記事を作成してください。
 
 指示: ${instructions || '各草案の良い部分を組み合わせて、バランスの取れた記事を作成してください。'}
@@ -347,17 +371,61 @@ ${ideasContext}
 草案:
 ${draftsText}
 
-完成した記事を作成してください（${textLengthReq}）。見出しを適切に使用し、読みやすい構成にしてください。
+【重要な文字数要件】
+必ず${textLengthReq}で作成してください。
+最小${targetLength.min}文字、最大${targetLength.max}文字の範囲内で作成してください。
+
+【文字数を満たすための指針】
+1. 各セクションを十分に詳しく説明する
+2. 具体例や事例を複数含める
+3. 背景情報や補足説明を充実させる
+4. 実践的なアドバイスや提案を詳細に記載する
+5. まとめや結論部分も充実させる
+
+見出しを適切に使用し、読みやすい構成にしてください。
+内容の質を保ちながら、指定された文字数を必ず満たしてください。
 `
-    
-    try {
-      const result = await this.model.generateContent(prompt)
-      const response = await result.response
-      return response.text()
-    } catch (error) {
-      console.error('Error combining drafts:', error)
-      throw error
+      
+      try {
+        console.log(`Generating combined article (attempt ${retryCount + 1})...`)
+        console.log(`Target length: ${targetLength.min}-${targetLength.max} characters`)
+        
+        const result = await this.model.generateContent(prompt)
+        const response = await result.response
+        const generatedText = response.text()
+        
+        // Check if the generated text meets the length requirement
+        const textLength = generatedText.length
+        console.log(`Generated text length: ${textLength} characters`)
+        
+        if (textLength >= targetLength.min) {
+          console.log('Text length requirement met')
+          return generatedText
+        } else {
+          console.log(`Text too short (${textLength} < ${targetLength.min}), retrying...`)
+          retryCount++
+          
+          if (retryCount >= maxRetries) {
+            console.warn(`Could not meet length requirement after ${maxRetries} attempts, returning best effort`)
+            return generatedText
+          }
+          
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+      } catch (error) {
+        console.error(`Error combining drafts (attempt ${retryCount + 1}):`, error)
+        retryCount++
+        
+        if (retryCount >= maxRetries) {
+          throw error
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
     }
+    
+    throw new Error('Failed to generate combined article')
   }
 }
 

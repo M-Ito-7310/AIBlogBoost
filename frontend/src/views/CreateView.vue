@@ -111,10 +111,19 @@ const resetWorkflow = () => {
 // Load cached data on mount
 onMounted(() => {
   if (articleStore.hasCachedData()) {
+    articleStore.loadFromCache()
+    
+    // If we're at Step 6, it means the article was already exported
+    // Reset the workflow to start fresh
+    if (articleStore.currentStep >= 6) {
+      articleStore.clearCache()
+      articleStore.resetWorkflow()
+      return
+    }
+    
+    // For other steps, ask if they want to continue
     const confirmLoad = confirm('保存された作成途中の記事があります。続きから作成しますか？')
-    if (confirmLoad) {
-      articleStore.loadFromCache()
-    } else {
+    if (!confirmLoad) {
       articleStore.clearCache()
       articleStore.resetWorkflow()
     }
