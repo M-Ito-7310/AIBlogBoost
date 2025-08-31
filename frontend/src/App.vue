@@ -1,56 +1,69 @@
 <template>
-  <div id="app" class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div id="app" class="min-h-screen bg-organic dark:bg-organic-dark relative overflow-hidden">
+    <!-- Floating Background Elements -->
+    <div class="floating-blob w-96 h-96 bg-gradient-to-br from-primary-300/40 to-accent-300/40 top-10 -right-20 animate-blob"></div>
+    <div class="floating-blob w-80 h-80 bg-gradient-to-br from-mint-300/30 to-primary-300/30 top-1/2 -left-16 animate-blob" style="animation-delay: -2s;"></div>
+    <div class="floating-blob w-64 h-64 bg-gradient-to-br from-accent-300/30 to-mint-300/30 bottom-20 right-1/4 animate-blob" style="animation-delay: -4s;"></div>
+    <div class="floating-blob w-72 h-72 bg-gradient-to-br from-primary-200/25 to-mint-200/25 top-1/3 right-1/3 animate-blob" style="animation-delay: -6s;"></div>
+    
     <!-- Navigation -->
-    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <nav class="glass-card border-b border-white/10 dark:border-surface-700/30 relative z-10">
       <div class="container mx-auto px-4">
         <div class="flex items-center justify-between h-16">
           <!-- Logo -->
-          <router-link to="/" class="flex items-center space-x-2">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center relative overflow-hidden">
+          <router-link to="/" class="flex items-center space-x-3 group">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center relative overflow-hidden shadow-lg shadow-primary-500/25 group-hover:shadow-primary-500/40 transition-all duration-300 group-hover:scale-105">
               <!-- AI/Brain icon -->
-              <svg class="w-4 h-4 text-white absolute top-0.5 left-0.5" fill="currentColor" viewBox="0 0 32 20">
+              <svg class="w-5 h-5 text-white absolute top-1 left-1" fill="currentColor" viewBox="0 0 32 20">
                 <path d="M8 6c-2.5 0-4.5 2-4.5 4.5 0 1.2 0.5 2.3 1.3 3.1C4.3 14.2 4 15.1 4 16c0 2.5 2 4.5 4.5 4.5h15c2.5 0 4.5-2 4.5-4.5 0-0.9-0.3-1.8-0.8-2.4 0.8-0.8 1.3-1.9 1.3-3.1C28.5 8 26.5 6 24 6c-1 0-1.9 0.3-2.6 0.8C20.6 6.3 19.8 6 19 6h-3c-0.8 0-1.6 0.3-2.4 0.8C12.9 6.3 12 6 11 6H8z"/>
               </svg>
               <!-- Pen icon -->
-              <svg class="w-3 h-3 text-yellow-300 absolute bottom-0.5 right-0.5 transform rotate-45" fill="currentColor" viewBox="0 0 12 16">
+              <svg class="w-3 h-3 text-yellow-300 absolute bottom-1 right-1 transform rotate-45" fill="currentColor" viewBox="0 0 12 16">
                 <rect x="4" y="0" width="2" height="12"/>
                 <polygon points="4,12 6,12 5,16"/>
               </svg>
               <!-- Sparkle -->
-              <div class="absolute top-1 right-1 w-1 h-1 bg-yellow-300 rounded-full"></div>
+              <div class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-yellow-300 rounded-full animate-pulse"></div>
             </div>
-            <span class="text-xl font-bold text-gray-800 dark:text-white">AIBlogBoost</span>
+            <div>
+              <h1 class="text-2xl font-display font-bold text-gradient">AIBlogBoost</h1>
+              <p class="text-xs subtitle-editorial -mt-1">AI-Powered Writing</p>
+            </div>
           </router-link>
           
           <!-- Navigation Links -->
-          <div class="hidden md:flex items-center space-x-6">
+          <div class="hidden md:flex items-center space-x-8">
             <router-link
               to="/"
-              class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
-              :class="{ 'text-blue-600 dark:text-blue-400': $route.name === 'home' }"
+              class="font-display font-medium text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 relative group"
+              :class="{ 'text-primary-600 dark:text-primary-400': $route.name === 'home' }"
             >
               ホーム
+              <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-300 group-hover:w-full" :class="{ 'w-full': $route.name === 'home' }"></span>
             </router-link>
             <router-link
               to="/create"
-              class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
-              :class="{ 'text-blue-600 dark:text-blue-400': $route.name === 'create' }"
+              class="font-display font-medium text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 relative group"
+              :class="{ 'text-primary-600 dark:text-primary-400': $route.name === 'create' }"
             >
               記事作成
+              <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-300 group-hover:w-full" :class="{ 'w-full': $route.name === 'create' }"></span>
             </router-link>
             <router-link
               to="/history"
-              class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
-              :class="{ 'text-blue-600 dark:text-blue-400': $route.name === 'history' }"
+              class="font-display font-medium text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 relative group"
+              :class="{ 'text-primary-600 dark:text-primary-400': $route.name === 'history' }"
             >
               履歴
+              <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-300 group-hover:w-full" :class="{ 'w-full': $route.name === 'history' }"></span>
             </router-link>
             <router-link
               to="/settings"
-              class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
-              :class="{ 'text-blue-600 dark:text-blue-400': $route.name === 'settings' }"
+              class="font-display font-medium text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 relative group"
+              :class="{ 'text-primary-600 dark:text-primary-400': $route.name === 'settings' }"
             >
               設定
+              <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-500 to-accent-500 transition-all duration-300 group-hover:w-full" :class="{ 'w-full': $route.name === 'settings' }"></span>
             </router-link>
           </div>
           
@@ -58,7 +71,7 @@
           <div class="flex items-center space-x-2">
             <button
               @click="toggleTheme"
-              class="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              class="p-3 rounded-2xl text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white/50 dark:hover:bg-surface-800/50 transition-all duration-300 group"
             >
               <svg v-if="!isDarkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
@@ -71,7 +84,7 @@
             <!-- Mobile Menu Button -->
             <button
               @click="mobileMenuOpen = !mobileMenuOpen"
-              class="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              class="md:hidden p-3 rounded-2xl text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white/50 dark:hover:bg-surface-800/50 transition-all duration-300"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -81,20 +94,20 @@
         </div>
         
         <!-- Mobile Menu -->
-        <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
-          <div class="space-y-2">
+        <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t border-white/10 dark:border-surface-700/30 backdrop-blur-sm">
+          <div class="space-y-1">
             <router-link
               to="/"
               @click="mobileMenuOpen = false"
-              class="block py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
-              :class="{ 'text-blue-600 dark:text-blue-400': $route.name === 'home' }"
+              class="block py-3 px-4 rounded-xl font-display font-medium text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white/30 dark:hover:bg-surface-800/30 transition-all duration-300"
+              :class="{ 'text-primary-600 dark:text-primary-400 bg-white/40 dark:bg-surface-800/40': $route.name === 'home' }"
             >
               ホーム
             </router-link>
             <router-link
               to="/create"
               @click="mobileMenuOpen = false"
-              class="block py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              class="block py-3 px-4 rounded-xl font-display font-medium text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white/30 dark:hover:bg-surface-800/30 transition-all duration-300"
               :class="{ 'text-blue-600 dark:text-blue-400': $route.name === 'create' }"
             >
               記事作成
@@ -102,7 +115,7 @@
             <router-link
               to="/history"
               @click="mobileMenuOpen = false"
-              class="block py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              class="block py-3 px-4 rounded-xl font-display font-medium text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white/30 dark:hover:bg-surface-800/30 transition-all duration-300"
               :class="{ 'text-blue-600 dark:text-blue-400': $route.name === 'history' }"
             >
               履歴
@@ -110,7 +123,7 @@
             <router-link
               to="/settings"
               @click="mobileMenuOpen = false"
-              class="block py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+              class="block py-3 px-4 rounded-xl font-display font-medium text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white/30 dark:hover:bg-surface-800/30 transition-all duration-300"
               :class="{ 'text-blue-600 dark:text-blue-400': $route.name === 'settings' }"
             >
               設定
@@ -126,33 +139,42 @@
     </main>
     
     <!-- Footer -->
-    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto">
-      <div class="container mx-auto px-4 py-6">
+    <footer class="glass-card border-t border-white/10 dark:border-surface-700/30 mt-auto relative z-10">
+      <div class="container mx-auto px-4 py-8">
         <div class="flex flex-col md:flex-row items-center justify-between">
-          <div class="flex items-center space-x-2 mb-4 md:mb-0">
-            <div class="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center relative overflow-hidden">
+          <div class="flex items-center space-x-3 mb-4 md:mb-0">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center relative overflow-hidden shadow-md">
               <!-- AI/Brain icon -->
-              <svg class="w-3 h-3 text-white absolute top-0.5 left-0.5" fill="currentColor" viewBox="0 0 32 20">
+              <svg class="w-4 h-4 text-white absolute top-0.5 left-0.5" fill="currentColor" viewBox="0 0 32 20">
                 <path d="M8 6c-2.5 0-4.5 2-4.5 4.5 0 1.2 0.5 2.3 1.3 3.1C4.3 14.2 4 15.1 4 16c0 2.5 2 4.5 4.5 4.5h15c2.5 0 4.5-2 4.5-4.5 0-0.9-0.3-1.8-0.8-2.4 0.8-0.8 1.3-1.9 1.3-3.1C28.5 8 26.5 6 24 6c-1 0-1.9 0.3-2.6 0.8C20.6 6.3 19.8 6 19 6h-3c-0.8 0-1.6 0.3-2.4 0.8C12.9 6.3 12 6 11 6H8z"/>
               </svg>
               <!-- Pen icon -->
-              <svg class="w-2 h-2 text-yellow-300 absolute bottom-0.5 right-0.5 transform rotate-45" fill="currentColor" viewBox="0 0 12 16">
+              <svg class="w-3 h-3 text-yellow-300 absolute bottom-0.5 right-0.5 transform rotate-45" fill="currentColor" viewBox="0 0 12 16">
                 <rect x="4" y="0" width="2" height="12"/>
                 <polygon points="4,12 6,12 5,16"/>
               </svg>
             </div>
-            <p class="text-gray-600 dark:text-gray-300 text-sm">
-              © 2025 AIBlogBoost. Powered by Google Gemini.
-            </p>
+            <div>
+              <p class="font-serif text-surface-700 dark:text-surface-300 text-sm font-medium">
+                © 2025 AIBlogBoost
+              </p>
+              <p class="text-xs text-surface-500 dark:text-surface-400">
+                Powered by Google Gemini
+              </p>
+            </div>
           </div>
           
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            <span v-if="isApiKeyConfigured" class="text-green-600 dark:text-green-400">
-              ✓ APIキー設定済み
-            </span>
-            <span v-else class="text-red-600 dark:text-red-400">
-              ⚠ APIキー未設定
-            </span>
+          <div class="flex items-center space-x-4">
+            <div class="px-3 py-1.5 rounded-xl text-sm font-medium" :class="isApiKeyConfigured ? 'bg-mint-100 dark:bg-mint-900/30 text-mint-700 dark:text-mint-400' : 'bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400'">
+              <span v-if="isApiKeyConfigured" class="flex items-center gap-1.5">
+                <div class="w-2 h-2 bg-mint-500 rounded-full animate-pulse"></div>
+                APIキー設定済み
+              </span>
+              <span v-else class="flex items-center gap-1.5">
+                <div class="w-2 h-2 bg-accent-500 rounded-full animate-pulse"></div>
+                APIキー未設定
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -178,11 +200,6 @@ const toggleTheme = () => {
 <style>
 /* Global styles */
 #app {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -190,5 +207,12 @@ const toggleTheme = () => {
 
 main {
   flex: 1;
+  position: relative;
+  z-index: 5;
+}
+
+/* Smooth transitions for route changes */
+.router-link-active {
+  transition: all 0.3s ease;
 }
 </style>

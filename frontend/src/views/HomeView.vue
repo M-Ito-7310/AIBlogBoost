@@ -1,111 +1,98 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-    <div class="container mx-auto px-4 py-16">
-      <div class="text-center mb-12">
-        <h1 class="text-5xl font-bold text-gray-800 dark:text-white mb-4">
-          AIBlogBoost
+  <div class="min-h-screen relative">
+    <!-- Hero Section -->
+    <div class="container mx-auto px-4 py-20 relative z-10">
+      <div class="text-center mb-16">
+        <div class="inline-block animate-float mb-8">
+          <div class="w-24 h-24 bg-gradient-to-br from-primary-500 via-accent-500 to-mint-500 rounded-3xl flex items-center justify-center relative overflow-hidden shadow-2xl shadow-primary-500/25">
+            <!-- AI/Brain icon -->
+            <svg class="w-12 h-12 text-white absolute top-2 left-2" fill="currentColor" viewBox="0 0 32 20">
+              <path d="M8 6c-2.5 0-4.5 2-4.5 4.5 0 1.2 0.5 2.3 1.3 3.1C4.3 14.2 4 15.1 4 16c0 2.5 2 4.5 4.5 4.5h15c2.5 0 4.5-2 4.5-4.5 0-0.9-0.3-1.8-0.8-2.4 0.8-0.8 1.3-1.9 1.3-3.1C28.5 8 26.5 6 24 6c-1 0-1.9 0.3-2.6 0.8C20.6 6.3 19.8 6 19 6h-3c-0.8 0-1.6 0.3-2.4 0.8C12.9 6.3 12 6 11 6H8z"/>
+            </svg>
+            <!-- Pen icon -->
+            <svg class="w-6 h-6 text-yellow-300 absolute bottom-2 right-2 transform rotate-45" fill="currentColor" viewBox="0 0 12 16">
+              <rect x="4" y="0" width="2" height="12"/>
+              <polygon points="4,12 6,12 5,16"/>
+            </svg>
+            <!-- Sparkles -->
+            <div class="absolute top-2 right-2 w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
+            <div class="absolute top-4 right-6 w-1 h-1 bg-yellow-200 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+          </div>
+        </div>
+        
+        <h1 class="title-editorial text-6xl lg:text-7xl mb-6">
+          <span class="text-gradient">AIBlogBoost</span>
         </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300">
+        <p class="subtitle-editorial text-xl lg:text-2xl mb-4 max-w-2xl mx-auto">
           AIの力で魅力的なブログ記事を簡単作成
+        </p>
+        <p class="font-serif text-surface-500 dark:text-surface-400 text-lg max-w-xl mx-auto leading-relaxed">
+          直感的な6ステップウィザードで、高品質なコンテンツをあなたの手で。
         </p>
       </div>
       
-      <div class="max-w-4xl mx-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 mb-8">
-          <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
+      <div class="max-w-5xl mx-auto">
+        <div class="glass-card rounded-3xl p-8 lg:p-12 mb-12">
+          <h2 class="title-editorial text-3xl lg:text-4xl text-center mb-12">
             6ステップで完璧な記事を作成
           </h2>
           
-          <div class="space-y-4">
-            <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
-                1
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="step-card group cursor-pointer" v-for="(step, index) in steps" :key="index">
+              <div class="step-indicator mb-4" :class="'pending'">
+                {{ index + 1 }}
               </div>
-              <div>
-                <h3 class="font-semibold text-gray-800 dark:text-white">ジャンルを選択</h3>
-                <p class="text-gray-600 dark:text-gray-300">ビジネス、技術、ライフスタイルなど</p>
-              </div>
-            </div>
-            
-            <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
-                2
-              </div>
-              <div>
-                <h3 class="font-semibold text-gray-800 dark:text-white">テーマを選択</h3>
-                <p class="text-gray-600 dark:text-gray-300">具体的なトピックを設定</p>
-              </div>
-            </div>
-            
-            <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
-                3
-              </div>
-              <div>
-                <h3 class="font-semibold text-gray-800 dark:text-white">アイデアをピックアップ</h3>
-                <p class="text-gray-600 dark:text-gray-300">AIが5つのアイデアを提案</p>
-              </div>
-            </div>
-            
-            <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
-                4
-              </div>
-              <div>
-                <h3 class="font-semibold text-gray-800 dark:text-white">草案を作成</h3>
-                <p class="text-gray-600 dark:text-gray-300">3つの異なるトーンで草案生成</p>
-              </div>
-            </div>
-            
-            <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
-                5
-              </div>
-              <div>
-                <h3 class="font-semibold text-gray-800 dark:text-white">記事をまとめる</h3>
-                <p class="text-gray-600 dark:text-gray-300">良い部分を組み合わせて完成</p>
-              </div>
-            </div>
-            
-            <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
-                6
-              </div>
-              <div>
-                <h3 class="font-semibold text-gray-800 dark:text-white">エクスポート</h3>
-                <p class="text-gray-600 dark:text-gray-300">Markdown、HTML、テキスト形式で保存</p>
-              </div>
+              <h3 class="font-display font-semibold text-lg text-surface-800 dark:text-surface-200 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">
+                {{ step.title }}
+              </h3>
+              <p class="font-serif text-surface-600 dark:text-surface-400 leading-relaxed">
+                {{ step.description }}
+              </p>
             </div>
           </div>
         </div>
         
-        <div class="text-center">
+        <div class="text-center mt-16">
           <button
             @click="startCreating"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg shadow-lg transform transition hover:scale-105"
+            class="btn-primary text-xl py-6 px-12 mb-6 relative overflow-hidden group"
           >
-            記事作成を開始
+            <span class="relative z-10">記事作成を開始</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-accent-500/20 to-mint-500/20 translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
           </button>
           
-          <div v-if="!isApiKeyConfigured" class="mt-4 text-sm text-red-600 dark:text-red-400">
-            ※ 最初にAPIキーの設定が必要です
+          <div v-if="!isApiKeyConfigured" class="inline-flex items-center gap-2 px-4 py-2 bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400 rounded-2xl text-sm font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            最初にAPIキーの設定が必要です
           </div>
         </div>
         
-        <div v-if="recentArticles.length > 0" class="mt-12">
-          <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+        <div v-if="recentArticles.length > 0" class="mt-20">
+          <h3 class="title-editorial text-2xl lg:text-3xl text-center mb-8">
             最近作成した記事
           </h3>
-          <div class="space-y-2">
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div
               v-for="article in recentArticles"
               :key="article.id"
-              class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow hover:shadow-md transition cursor-pointer"
+              class="glass-card rounded-2xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
               @click="viewArticle(article.id)"
             >
-              <h4 class="font-semibold text-gray-800 dark:text-white">{{ article.title }}</h4>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ article.genre }} • {{ article.theme }} • {{ formatDate(article.createdAt) }}
+              <h4 class="font-display font-semibold text-surface-800 dark:text-surface-200 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                {{ article.title }}
+              </h4>
+              <div class="flex flex-wrap gap-2 mb-3">
+                <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-medium rounded-lg">
+                  {{ article.genre }}
+                </span>
+                <span class="px-2 py-1 bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300 text-xs font-medium rounded-lg">
+                  {{ formatDate(article.createdAt) }}
+                </span>
+              </div>
+              <p class="font-serif text-surface-600 dark:text-surface-400 text-sm line-clamp-2">
+                {{ article.theme }}
               </p>
             </div>
           </div>
@@ -126,7 +113,34 @@ const settingsStore = useSettingsStore()
 const historyStore = useHistoryStore()
 
 const isApiKeyConfigured = computed(() => settingsStore.isApiKeyConfigured)
-const recentArticles = computed(() => historyStore.recentArticles.slice(0, 3))
+const recentArticles = computed(() => historyStore.recentArticles.slice(0, 6))
+
+const steps = [
+  {
+    title: 'ジャンルを選択',
+    description: 'ビジネス、技術、ライフスタイルなど9つのカテゴリから選択。カスタムジャンルも対応。'
+  },
+  {
+    title: 'テーマを定義',
+    description: '具体的なトピック、ターゲット読者、希望文字数を指定してコンテンツの方向性を決める。'
+  },
+  {
+    title: 'アイデアを選択',
+    description: 'AIが生成する5つのアイデアから最大3つまで選択し、優先度を設定して組み合わせる。'
+  },
+  {
+    title: '草案を作成',
+    description: 'プロフェッショナル、カジュアル、教育的な3つの異なるトーンで草案を生成。'
+  },
+  {
+    title: '記事を結合',
+    description: '各草案の最適な部分をインテリジェントに組み合わせ、カスタム指示で完成度を高める。'
+  },
+  {
+    title: 'エクスポート',
+    description: 'Markdown、HTML、テキスト形式でダウンロードし、ローカル履歴に自動保存。'
+  }
+]
 
 const startCreating = () => {
   if (isApiKeyConfigured.value) {
