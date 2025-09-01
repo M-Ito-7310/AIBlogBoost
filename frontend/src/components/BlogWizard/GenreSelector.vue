@@ -152,11 +152,13 @@ const proceedToNext = () => {
     return
   }
   
-  const finalGenre = customGenre.value || 
+  const finalGenre = customGenre.value || selectedGenre.value
+  const genreName = customGenre.value || 
     genres.find(g => g.id === selectedGenre.value)?.name || 
     selectedGenre.value
     
-  articleStore.setGenre(finalGenre)
+  articleStore.setGenre(genreName)
+  articleStore.setGenreId(selectedGenre.value)
   emit('next')
 }
 </script>

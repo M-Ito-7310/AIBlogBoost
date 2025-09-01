@@ -22,7 +22,7 @@
           v-model="theme"
           type="text"
           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-          placeholder="例: リモートワークの生産性向上術"
+          :placeholder="dynamicPlaceholders.theme"
           @keyup.enter="proceedToNext"
         />
       </div>
@@ -35,7 +35,7 @@
           v-model="targetAudience"
           type="text"
           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-          placeholder="例: 20-30代のビジネスパーソン"
+          :placeholder="dynamicPlaceholders.targetAudience"
         />
       </div>
       
@@ -47,7 +47,7 @@
           v-model="purpose"
           rows="3"
           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-          placeholder="例: 読者にリモートワークでの効率的な働き方を伝え、実践的なテクニックを提供する"
+          :placeholder="dynamicPlaceholders.purpose"
         />
       </div>
       
@@ -117,11 +117,66 @@ const emit = defineEmits(['next', 'previous'])
 const articleStore = useArticleStore()
 
 const selectedGenre = computed(() => articleStore.selectedGenre)
+const selectedGenreId = computed(() => articleStore.selectedGenreId)
 const theme = ref(articleStore.selectedTheme || '')
 const targetAudience = ref('')
 const purpose = ref('')
 const textLength = ref(articleStore.textLength || '2000-3000')
 const customTextLength = ref(articleStore.customTextLength || '')
+
+// Genre-specific placeholder examples
+const genrePlaceholders: Record<string, {theme: string, targetAudience: string, purpose: string}> = {
+  business: {
+    theme: '例: リモートワークの生産性向上術',
+    targetAudience: '例: 20-30代のビジネスパーソン',
+    purpose: '例: 読者にリモートワークでの効率的な働き方を伝え、実践的なテクニックを提供する'
+  },
+  technology: {
+    theme: '例: ChatGPTを活用したプログラミング効率化',
+    targetAudience: '例: エンジニア・開発者',
+    purpose: '例: AI技術を使った開発効率の向上方法を具体的に解説する'
+  },
+  lifestyle: {
+    theme: '例: 30代からの健康的な生活習慣作り',
+    targetAudience: '例: 健康意識の高い30-40代',
+    purpose: '例: 忙しい現代人でも続けられる健康習慣を紹介し、実践につなげる'
+  },
+  education: {
+    theme: '例: 社会人のための効果的な英語学習法',
+    targetAudience: '例: 英語を学び直したい社会人',
+    purpose: '例: 忙しい社会人でも継続できる英語学習の方法を具体的に提案する'
+  },
+  entertainment: {
+    theme: '例: 2024年注目のアニメ作品レビュー',
+    targetAudience: '例: アニメファン・エンタメ好き',
+    purpose: '例: 最新アニメの魅力を伝え、視聴の参考になる情報を提供する'
+  },
+  travel: {
+    theme: '例: 一人旅初心者のための国内旅行ガイド',
+    targetAudience: '例: 一人旅に興味がある20-30代',
+    purpose: '例: 一人旅の魅力と安全に楽しむためのコツを分かりやすく解説する'
+  },
+  finance: {
+    theme: '例: 20代から始める資産運用の基本',
+    targetAudience: '例: 投資初心者の20-30代',
+    purpose: '例: 投資の基礎知識から実践的な資産運用方法まで分かりやすく説明する'
+  },
+  health: {
+    theme: '例: デスクワーカーのための肩こり解消法',
+    targetAudience: '例: 肩こりに悩むオフィスワーカー',
+    purpose: '例: デスクワークによる肩こりの原因と効果的な解消方法を紹介する'
+  },
+  other: {
+    theme: '例: あなたの専門分野に関する興味深いトピック',
+    targetAudience: '例: そのトピックに関心を持つ読者層',
+    purpose: '例: 読者に新しい知識や視点を提供し、行動につながる情報を伝える'
+  }
+}
+
+const dynamicPlaceholders = computed(() => {
+  const genreId = selectedGenreId.value || 'other'
+  return genrePlaceholders[genreId] || genrePlaceholders.other
+})
 
 const proceedToNext = () => {
   if (!theme.value.trim()) return

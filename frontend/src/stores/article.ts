@@ -37,6 +37,7 @@ export const useArticleStore = defineStore('article', () => {
   
   // Step 1: Genre
   const selectedGenre = ref<string>('')
+  const selectedGenreId = ref<string>('')
   
   // Step 2: Theme
   const selectedTheme = ref<string>('')
@@ -88,6 +89,10 @@ export const useArticleStore = defineStore('article', () => {
   // Step setters
   const setGenre = (genre: string) => {
     selectedGenre.value = genre
+  }
+  
+  const setGenreId = (genreId: string) => {
+    selectedGenreId.value = genreId
   }
   
   const setTheme = (theme: string) => {
@@ -182,6 +187,7 @@ export const useArticleStore = defineStore('article', () => {
     // State
     currentStep,
     selectedGenre,
+    selectedGenreId,
     selectedTheme,
     textLength,
     customTextLength,
@@ -196,6 +202,7 @@ export const useArticleStore = defineStore('article', () => {
     goToStep,
     resetWorkflow,
     setGenre,
+    setGenreId,
     setTheme,
     setTextLength,
     setIdeas,
