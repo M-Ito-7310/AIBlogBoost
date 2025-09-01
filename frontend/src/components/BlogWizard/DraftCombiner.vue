@@ -114,6 +114,38 @@
         </div>
       </div>
       
+      <!-- SEO Keywords -->
+      <div v-if="seoKeywords.length > 0" class="mb-6">
+        <div class="border border-gray-300 dark:border-gray-600 rounded-lg">
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 px-4 py-3 border-b border-gray-300 dark:border-gray-600">
+            <h3 class="font-semibold text-gray-800 dark:text-white flex items-center">
+              <svg class="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              SEOキーワード
+            </h3>
+          </div>
+          
+          <div class="p-4">
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="(keyword, index) in seoKeywords"
+                :key="index"
+                class="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm font-medium rounded-full border border-blue-200 dark:border-blue-700"
+              >
+                <svg class="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                </svg>
+                {{ keyword }}
+              </span>
+            </div>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mt-3">
+              これらのキーワードは記事の内容に基づいて自動生成されました。SEO対策やタグ設定にご活用ください。
+            </p>
+          </div>
+        </div>
+      </div>
+      
       <!-- Edit Mode -->
       <div v-if="editArticle" class="mt-4">
         <textarea
@@ -264,6 +296,7 @@ const articleStore = useArticleStore()
 const drafts = computed(() => articleStore.generatedDrafts)
 const instructions = ref('')
 const finalContent = ref('')
+const seoKeywords = ref<string[]>([])
 const isLoading = ref(false)
 const error = ref('')
 const viewFullArticle = ref(false)
@@ -315,16 +348,18 @@ const combineArticle = async () => {
   error.value = ''
   
   try {
-    const combined = await geminiService.combineDrafts(drafts.value, instructions.value)
-    finalContent.value = combined
+    const result = await geminiService.combineDrafts(drafts.value, instructions.value)
+    finalContent.value = result.content
+    seoKeywords.value = result.seoKeywords
     
     // Create final article object
     const finalArticle = {
-      title: extractTitle(combined) || drafts.value[0]?.title || 'Generated Article',
-      content: combined,
+      title: extractTitle(result.content) || drafts.value[0]?.title || 'Generated Article',
+      content: result.content,
       genre: articleStore.selectedGenre,
       theme: articleStore.selectedTheme,
-      keywords: articleStore.selectedIdea?.keywords || [],
+      keywords: [...(articleStore.selectedIdea?.keywords || []), ...result.seoKeywords],
+      seoKeywords: result.seoKeywords,
       createdAt: new Date()
     }
     

@@ -27,6 +27,7 @@ export interface BlogArticle {
   genre: string
   theme: string
   keywords: string[]
+  seoKeywords?: string[]
   createdAt: Date
 }
 

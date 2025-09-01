@@ -350,7 +350,7 @@ ${ideasContext}
     throw new Error(`Failed to regenerate ${tone} draft`)
   }
   
-  async combineDrafts(drafts: BlogDraft[], instructions: string): Promise<string> {
+  async combineDrafts(drafts: BlogDraft[], instructions: string): Promise<{content: string, seoKeywords: string[]}> {
     if (!this.model) throw new Error('Gemini API not initialized')
     
     const draftsText = drafts.map((draft, index) => 
@@ -384,6 +384,15 @@ ${draftsText}
 
 見出しを適切に使用し、読みやすい構成にしてください。
 内容の質を保ちながら、指定された文字数を必ず満たしてください。
+
+また、以下のJSON形式で、記事とSEOキーワードを出力してください：
+
+{
+  "content": "記事の本文をここに...",
+  "seoKeywords": ["キーワード1", "キーワード2", "キーワード3", "キーワード4", "キーワード5"]
+}
+
+SEOキーワードは記事の内容に関連する検索されやすい5つのキーワードを選んでください。
 `
       
       try {
@@ -394,24 +403,56 @@ ${draftsText}
         const response = await result.response
         const generatedText = response.text()
         
-        // Check if the generated text meets the length requirement
-        const textLength = generatedText.length
-        console.log(`Generated text length: ${textLength} characters`)
-        
-        if (textLength >= targetLength.min) {
-          console.log('Text length requirement met')
-          return generatedText
-        } else {
-          console.log(`Text too short (${textLength} < ${targetLength.min}), retrying...`)
-          retryCount++
-          
-          if (retryCount >= maxRetries) {
-            console.warn(`Could not meet length requirement after ${maxRetries} attempts, returning best effort`)
-            return generatedText
+        // Try to parse JSON response
+        try {
+          const jsonMatch = generatedText.match(/\{[\s\S]*\}/)
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0])
+            const content = parsed.content
+            const seoKeywords = parsed.seoKeywords || []
+            
+            // Check if the generated content meets the length requirement
+            const contentLength = content.length
+            console.log(`Generated content length: ${contentLength} characters`)
+            
+            if (contentLength >= targetLength.min) {
+              console.log('Content length requirement met')
+              return { content, seoKeywords }
+            } else {
+              console.log(`Content too short (${contentLength} < ${targetLength.min}), retrying...`)
+              retryCount++
+              
+              if (retryCount >= maxRetries) {
+                console.warn(`Could not meet length requirement after ${maxRetries} attempts, returning best effort`)
+                return { content, seoKeywords }
+              }
+              
+              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 1000))
+              continue
+            }
           }
+        } catch (parseError) {
+          console.log('Failed to parse JSON, treating as plain text')
+          // Fallback to plain text
+          const contentLength = generatedText.length
+          console.log(`Generated text length: ${contentLength} characters`)
           
-          // Wait before retry
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          if (contentLength >= targetLength.min) {
+            console.log('Text length requirement met')
+            return { content: generatedText, seoKeywords: [] }
+          } else {
+            console.log(`Text too short (${contentLength} < ${targetLength.min}), retrying...`)
+            retryCount++
+            
+            if (retryCount >= maxRetries) {
+              console.warn(`Could not meet length requirement after ${maxRetries} attempts, returning best effort`)
+              return { content: generatedText, seoKeywords: [] }
+            }
+            
+            // Wait before retry
+            await new Promise(resolve => setTimeout(resolve, 1000))
+          }
         }
       } catch (error) {
         console.error(`Error combining drafts (attempt ${retryCount + 1}):`, error)
