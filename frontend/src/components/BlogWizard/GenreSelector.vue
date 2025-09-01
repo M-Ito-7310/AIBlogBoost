@@ -37,15 +37,7 @@
       />
     </div>
     
-    <div class="flex justify-between">
-      <button
-        @click="$emit('previous')"
-        class="px-6 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-        disabled
-      >
-        戻る
-      </button>
-      
+    <div class="flex justify-end">
       <button
         @click="proceedToNext"
         :disabled="!selectedGenre || (selectedGenre === 'other' && !customGenre.trim())"
