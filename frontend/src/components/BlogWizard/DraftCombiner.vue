@@ -160,13 +160,14 @@
     </div>
     
     <!-- Full Article Modal -->
-    <div
-      v-if="viewFullArticle"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-      @click.self="viewFullArticle = false"
-    >
+    <Teleport to="body">
+      <div
+        v-if="viewFullArticle"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]"
+        @click.self="viewFullArticle = false"
+      >
       <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
-        <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
+        <div class="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-xl font-bold text-gray-800 dark:text-white">
@@ -193,16 +194,18 @@
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Teleport>
     
     <!-- Draft Preview Modal -->
-    <div
-      v-if="viewingDraftPreview"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-      @click.self="viewingDraftPreview = null"
-    >
+    <Teleport to="body">
+      <div
+        v-if="viewingDraftPreview"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]"
+        @click.self="viewingDraftPreview = null"
+      >
       <div class="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
-        <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
+        <div class="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-xl font-bold text-gray-800 dark:text-white">
@@ -245,7 +248,8 @@
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
