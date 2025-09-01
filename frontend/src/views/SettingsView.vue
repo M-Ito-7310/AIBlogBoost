@@ -107,7 +107,7 @@
           言語
         </h2>
         
-        <div class="space-y-2">
+        <div class="space-y-3">
           <label class="flex items-center">
             <input
               type="radio"
@@ -118,16 +118,22 @@
             />
             <span class="text-gray-700 dark:text-gray-300">日本語</span>
           </label>
-          <label class="flex items-center">
+          <label class="flex items-center opacity-50 cursor-not-allowed">
             <input
               type="radio"
               value="en"
-              v-model="currentLanguage"
-              @change="updateLanguage"
+              disabled
               class="mr-2"
             />
-            <span class="text-gray-700 dark:text-gray-300">English</span>
+            <span class="text-gray-400 dark:text-gray-500">English</span>
+            <span class="text-xs text-gray-400 dark:text-gray-500 ml-2">(今後対応予定)</span>
           </label>
+        </div>
+        
+        <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <p class="text-xs text-gray-600 dark:text-gray-400">
+            現在は日本語のみサポートしています。英語対応は将来のアップデートで実装予定です。
+          </p>
         </div>
       </div>
       
