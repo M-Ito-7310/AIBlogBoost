@@ -1,9 +1,10 @@
 <template>
-  <Transition name="modal">
-    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-      <div class="relative w-full max-w-4xl max-h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+  <Teleport to="body">
+    <Transition name="modal">
+      <div v-if="isOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black bg-opacity-50">
+      <div class="relative w-full max-w-6xl max-h-[95vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
         <!-- Header -->
-        <div class="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div class="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white">
               APIキーの設定方法
@@ -35,7 +36,7 @@
         </div>
 
         <!-- Content -->
-        <div class="overflow-y-auto" style="max-height: calc(90vh - 180px)">
+        <div class="overflow-y-auto" style="max-height: calc(95vh - 180px)">
           <div class="p-6">
             <!-- Slide content -->
             <div class="space-y-4">
@@ -44,13 +45,22 @@
               </h3>
               
               <!-- Image -->
-              <div class="flex justify-center bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                <img 
-                  :src="slides[currentSlide].image" 
-                  :alt="slides[currentSlide].title"
-                  class="max-w-full h-auto rounded shadow-lg"
-                  style="max-height: 400px"
-                />
+              <div class="space-y-2">
+                <div class="flex justify-center bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                  <img 
+                    :src="slides[currentSlide].image" 
+                    :alt="slides[currentSlide].title"
+                    class="w-full h-auto rounded shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+                    style="max-height: 600px"
+                    @click="openImageInNewTab(slides[currentSlide].image)"
+                  />
+                </div>
+                <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+                  <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                  </svg>
+                  画像をクリックすると拡大表示されます
+                </p>
               </div>
 
               <!-- Description -->
@@ -89,7 +99,7 @@
         </div>
 
         <!-- Footer with navigation -->
-        <div class="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div class="sticky bottom-0 z-20 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
           <div class="flex items-center justify-between">
             <button
               @click="previousSlide"
@@ -140,8 +150,9 @@
           </div>
         </div>
       </div>
-    </div>
-  </Transition>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -237,7 +248,7 @@ const slides = [
     title: 'ステップ7: 記事作成を開始',
     image: img7,
     description: [
-      'ホーム画面に戻ると、記事作成が可能になっています。',
+      'ホーム画面に戻ると、画面右下が「APIキー設定済み」と表示され、記事作成が可能になっています。',
       '「記事作成を開始」ボタンをクリックして、AIを活用した記事作成を始めましょう。',
       '6つのステップで、高品質な記事を簡単に作成できます。'
     ],
@@ -265,6 +276,10 @@ const completeGuide = () => {
   close()
   router.push('/settings')
 }
+
+const openImageInNewTab = (imageSrc: string) => {
+  window.open(imageSrc, '_blank')
+}
 </script>
 
 <style scoped>
@@ -286,5 +301,10 @@ const completeGuide = () => {
 .modal-enter-from .modal-content,
 .modal-leave-to .modal-content {
   transform: scale(0.95);
+}
+
+/* Ensure modal is always on top */
+:deep(.fixed) {
+  z-index: 99999 !important;
 }
 </style>
