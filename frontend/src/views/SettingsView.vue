@@ -15,18 +15,28 @@
           </p>
           
           <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <h3 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">APIキーの取得方法：</h3>
-            <ol class="list-decimal list-inside space-y-1 text-sm text-blue-700 dark:text-blue-400">
-              <li>
-                <a href="https://makersuite.google.com/app/apikey" target="_blank" class="underline hover:text-blue-900">
-                  Google AI Studio
-                </a>
-                にアクセス
-              </li>
-              <li>Googleアカウントでログイン</li>
-              <li>「Get API key」をクリック</li>
-              <li>APIキーをコピー</li>
-            </ol>
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h3 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">APIキーの取得方法</h3>
+                <ol class="list-decimal list-inside space-y-1 text-sm text-blue-700 dark:text-blue-400">
+                  <li>
+                    <a href="https://makersuite.google.com/app/apikey" target="_blank" class="underline hover:text-blue-900">
+                      Google AI Studio
+                    </a>
+                    にアクセス
+                  </li>
+                  <li>Googleアカウントでログイン</li>
+                  <li>「APIキーを作成」をクリック</li>
+                  <li>APIキーをコピー</li>
+                </ol>
+              </div>
+              <button
+                @click="showApiKeyGuide = true"
+                class="ml-4 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-sm underline whitespace-nowrap"
+              >
+                詳しい手順を見る
+              </button>
+            </div>
           </div>
           
           <div>
@@ -144,6 +154,9 @@
         </div>
       </div>
     </div>
+    
+    <!-- API Key Guide Modal -->
+    <ApiKeyGuideModal v-model="showApiKeyGuide" />
   </div>
 </template>
 
@@ -152,9 +165,11 @@ import { ref, computed } from 'vue'
 import { useSettingsStore } from '../stores/settings'
 import { useHistoryStore } from '../stores/history'
 import { geminiService } from '../services/geminiService'
+import ApiKeyGuideModal from '../components/ApiKeyGuideModal.vue'
 
 const settingsStore = useSettingsStore()
 const historyStore = useHistoryStore()
+const showApiKeyGuide = ref(false)
 
 const apiKeyInput = ref('')
 const isApiKeyConfigured = computed(() => settingsStore.isApiKeyConfigured)
