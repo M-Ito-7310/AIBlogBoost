@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIBlogBoost - 統計管理画面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        select, button {
+            padding: 0.7rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+        }
+
+        button:hover {
+            background: #5a6fd8;
+        }
+
+        select:focus, button:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th, .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .genre-tag {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background: #e9ecef;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            color: #495057;
+        }
+
+        .event-type {
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .event-api { background: #28a745; }
+        .event-article { background: #ffc107; color: #333; }
+        .event-page { background: #17a2b8; }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 AIBlogBoost 統計管理画面</h1>
+        <p>API使用状況とユーザー行動の分析</p>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalEvents">-</div>
+                <div class="stat-label">総イベント数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="apiCalls">-</div>
+                <div class="stat-label">API呼び出し数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="articlesCreated">-</div>
+                <div class="stat-label">作成記事数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="uniqueSessions">-</div>
+                <div class="stat-label">ユニークセッション</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">📈 統計サマリー</h2>
+            <div class="controls">
+                <select id="timeframeSelect">
+                    <option value="1h">過去1時間</option>
+                    <option value="24h" selected>過去24時間</option>
+                    <option value="7d">過去7日</option>
+                    <option value="30d">過去30日</option>
+                    <option value="all">全期間</option>
+                </select>
+                <button onclick="refreshData()">🔄 更新</button>
+                <button onclick="exportData()">📋 エクスポート</button>
+            </div>
+            
+            <div id="summaryTable"></div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">📋 最近のイベント</h2>
+            <div id="recentEvents"></div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">👥 アクティブセッション</h2>
+            <div id="activeSessions"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = null;
+
+        async function loadStats() {
+            try {
+                const timeframe = document.getElementById('timeframeSelect').value;
+                const response = await fetch(`/api/stats/summary?timeframe=${timeframe}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                currentData = data;
+                updateDashboard(data);
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                showError('統計データの読み込みに失敗しました');
+            }
+        }
+
+        async function loadAdminData() {
+            try {
+                const response = await fetch('/api/stats/admin');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                updateAdminSections(data);
+                
+            } catch (error) {
+                console.error('Error loading admin data:', error);
+                showError('管理データの読み込みに失敗しました');
+            }
+        }
+
+        function updateDashboard(data) {
+            const { totals, summary, hourlyData } = data;
+            
+            document.getElementById('totalEvents').textContent = totals.total_events || 0;
+            document.getElementById('apiCalls').textContent = totals.api_calls || 0;
+            document.getElementById('articlesCreated').textContent = totals.articles_created || 0;
+            document.getElementById('uniqueSessions').textContent = totals.unique_sessions || 0;
+
+            const summaryHtml = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>イベントタイプ</th>
+                            <th>ジャンル</th>
+                            <th>回数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${summary.map(item => `
+                            <tr>
+                                <td><span class="event-type event-${item.event_type.replace('_', '')}">${getEventTypeLabel(item.event_type)}</span></td>
+                                <td>${item.genre ? `<span class="genre-tag">${item.genre}</span>` : '-'}</td>
+                                <td><strong>${item.count}</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('summaryTable').innerHTML = summaryHtml;
+        }
+
+        function updateAdminSections(data) {
+            const { recentEvents, activeSessions } = data;
+            
+            const recentHtml = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>セッション</th>
+                            <th>イベント</th>
+                            <th>ジャンル</th>
+                            <th>メタデータ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentEvents.map(event => `
+                            <tr>
+                                <td>${formatTimestamp(event.timestamp)}</td>
+                                <td><code>${event.session_id.substring(0, 8)}...</code></td>
+                                <td><span class="event-type event-${event.event_type.replace('_', '')}">${getEventTypeLabel(event.event_type)}</span></td>
+                                <td>${event.genre ? `<span class="genre-tag">${event.genre}</span>` : '-'}</td>
+                                <td>${event.metadata ? `<small>${JSON.stringify(JSON.parse(event.metadata))}</small>` : '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            const sessionsHtml = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>セッションID</th>
+                            <th>初回アクセス</th>
+                            <th>最終アクセス</th>
+                            <th>API呼び出し</th>
+                            <th>記事作成</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${activeSessions.map(session => `
+                            <tr>
+                                <td><code>${session.session_id.substring(0, 8)}...</code></td>
+                                <td>${formatTimestamp(session.first_seen)}</td>
+                                <td>${formatTimestamp(session.last_seen)}</td>
+                                <td><strong>${session.total_api_calls}</strong></td>
+                                <td><strong>${session.total_articles}</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('recentEvents').innerHTML = recentHtml;
+            document.getElementById('activeSessions').innerHTML = sessionsHtml;
+        }
+
+        function getEventTypeLabel(eventType) {
+            const labels = {
+                'api_call': 'API呼び出し',
+                'article_created': '記事作成',
+                'page_view': 'ページ表示'
+            };
+            return labels[eventType] || eventType;
+        }
+
+        function formatTimestamp(timestamp) {
+            return new Date(timestamp).toLocaleString('ja-JP', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.stats-grid'));
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        async function refreshData() {
+            await Promise.all([loadStats(), loadAdminData()]);
+        }
+
+        async function exportData() {
+            try {
+                const timeframe = document.getElementById('timeframeSelect').value;
+                const response = await fetch(`/api/stats/admin?limit=1000&timeframe=${timeframe}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Export failed: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                const csv = convertToCSV(data.recentEvents);
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `aiblogboost_stats_${timeframe}_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                showError('エクスポートに失敗しました');
+            }
+        }
+
+        function convertToCSV(data) {
+            const headers = ['ID', 'Session ID', 'Event Type', 'Genre', 'Timestamp', 'Metadata'];
+            const rows = data.map(row => [
+                row.id,
+                row.session_id,
+                row.event_type,
+                row.genre || '',
+                row.timestamp,
+                row.metadata || ''
+            ]);
+
+            return [headers, ...rows]
+                .map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
+                .join('\n');
+        }
+
+        document.getElementById('timeframeSelect').addEventListener('change', loadStats);
+
+        window.addEventListener('load', () => {
+            refreshData();
+            setInterval(refreshData, 60000);
+        });
+    </script>
+</body>
+</html>

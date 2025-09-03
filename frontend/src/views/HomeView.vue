@@ -29,6 +29,43 @@
         <p class="font-serif text-surface-500 dark:text-surface-400 text-lg w-full mx-auto leading-relaxed">
           直感的な6ステップウィザードで、高品質なコンテンツをあなたの手で。
         </p>
+
+        <!-- 統計カウンター -->
+        <div class="mt-8 flex justify-center">
+          <div class="glass-card rounded-2xl px-8 py-4 bg-gradient-to-r from-primary-50/50 to-accent-50/50 dark:from-primary-900/30 dark:to-accent-900/30 border border-primary-200/30 dark:border-primary-700/30">
+            <div class="flex items-center gap-8 text-center">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <div>
+                  <div class="font-display font-bold text-2xl text-primary-700 dark:text-primary-300">{{ stats.articlesCreated || 0 }}</div>
+                  <div class="text-xs text-surface-600 dark:text-surface-400 font-medium">記事作成</div>
+                </div>
+              </div>
+              <div class="w-px h-8 bg-surface-300 dark:bg-surface-600"></div>
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-accent-600 dark:text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <div>
+                  <div class="font-display font-bold text-2xl text-accent-700 dark:text-accent-300">{{ stats.apiCalls || 0 }}</div>
+                  <div class="text-xs text-surface-600 dark:text-surface-400 font-medium">API使用</div>
+                </div>
+              </div>
+              <div class="w-px h-8 bg-surface-300 dark:bg-surface-600"></div>
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-mint-600 dark:text-mint-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                </svg>
+                <div>
+                  <div class="font-display font-bold text-2xl text-mint-700 dark:text-mint-300">{{ stats.uniqueSessions || 0 }}</div>
+                  <div class="text-xs text-surface-600 dark:text-surface-400 font-medium">アクティブユーザー</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div class="max-w-5xl mx-auto">
@@ -124,10 +161,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSettingsStore } from '../stores/settings'
 import { useHistoryStore } from '../stores/history'
+import { statsService, type StatsData } from '../services/statsService'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()
@@ -135,6 +173,15 @@ const historyStore = useHistoryStore()
 
 const isApiKeyConfigured = computed(() => settingsStore.isApiKeyConfigured)
 const recentArticles = computed(() => historyStore.recentArticles.slice(0, 6))
+const stats = ref<StatsData>({ totalEvents: 0, apiCalls: 0, articlesCreated: 0, uniqueSessions: 0 })
+
+onMounted(async () => {
+  statsService.trackPageView()
+  const statsData = await statsService.getStats('all')
+  if (statsData) {
+    stats.value = statsData
+  }
+})
 
 const steps = [
   {

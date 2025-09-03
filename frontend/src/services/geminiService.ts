@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { BlogIdea, BlogDraft, SelectedIdea } from '../stores/article'
 import { useArticleStore } from '../stores/article'
+import { statsService } from './statsService'
 
 class GeminiService {
   private genAI: GoogleGenerativeAI | null = null
@@ -54,6 +55,8 @@ class GeminiService {
   
   async generateIdeas(genre: string, theme: string): Promise<BlogIdea[]> {
     if (!this.model) throw new Error('Gemini API not initialized')
+    
+    statsService.trackApiCall(genre, { action: 'generateIdeas' })
     
     const prompt = `
 あなたはプロのブログライターです。以下のジャンルとテーマに基づいて、魅力的なブログ記事のアイデアを5つ提案してください。
@@ -154,6 +157,9 @@ JSON形式で回答してください：
   
   async generateDraftsFromMultipleIdeas(selectedIdeas: SelectedIdea[]): Promise<BlogDraft[]> {
     if (!this.model) throw new Error('Gemini API not initialized')
+    
+    const articleStore = useArticleStore()
+    statsService.trackApiCall(articleStore.genre, { action: 'generateDrafts', ideasCount: selectedIdeas.length })
     
     const tones = ['プロフェッショナル', 'カジュアル', '教育的']
     const drafts: BlogDraft[] = []
@@ -352,6 +358,9 @@ ${ideasContext}
   
   async combineDrafts(drafts: BlogDraft[], instructions: string): Promise<{content: string, seoKeywords: string[]}> {
     if (!this.model) throw new Error('Gemini API not initialized')
+    
+    const articleStore = useArticleStore()
+    statsService.trackApiCall(articleStore.genre, { action: 'combineDrafts', draftsCount: drafts.length })
     
     const draftsText = drafts.map((draft, index) => 
       `草案${index + 1}（${draft.tone}）:\n${draft.content}`

@@ -221,6 +221,7 @@ import { useRouter } from 'vue-router'
 import { useArticleStore } from '../../stores/article'
 import { useHistoryStore } from '../../stores/history'
 import { exportService } from '../../services/exportService'
+import { statsService } from '../../services/statsService'
 
 const emit = defineEmits(['previous'])
 const router = useRouter()
@@ -272,6 +273,13 @@ const saveToHistory = () => {
   historyStore.addArticle(finalArticle.value)
   isSaved.value = true
   showSuccess('記事を履歴に保存しました')
+  
+  statsService.trackArticleCreated(finalArticle.value.genre, {
+    title: finalArticle.value.title,
+    contentLength: finalArticle.value.content.length,
+    keywordCount: finalArticle.value.keywords.length,
+    seoKeywordCount: finalArticle.value.seoKeywords?.length || 0
+  })
   
   // Clear cache after saving to history
   articleStore.clearCache()
