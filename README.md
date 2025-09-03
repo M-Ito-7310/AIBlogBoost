@@ -10,7 +10,7 @@ AI-powered blog article creation assistant tool for generating high-quality cont
 
 ## Overview
 
-AIBlogBoost is a frontend-only SPA that leverages Google Gemini AI to assist in creating compelling blog articles through a structured workflow. Built as a portfolio project demonstrating modern web development practices with AI integration.
+AIBlogBoost is a modern web application that leverages Google Gemini AI to assist in creating compelling blog articles through a structured workflow. The application features a Vue.js frontend with an optional Express.js backend for usage analytics, demonstrating full-stack development practices with AI integration.
 
 ## Features
 
@@ -44,6 +44,12 @@ AIBlogBoost is a frontend-only SPA that leverages Google Gemini AI to assist in 
 - **Favorites System** - Mark important articles for quick access
 - **Copy to Clipboard** - Quick sharing functionality
 
+### 📊 **Usage Analytics** (Optional Backend)
+- **Real-time Statistics** - Track article creation, API usage, and active users
+- **Homepage Counter** - Visitor counter-style display showing platform usage
+- **Privacy-Focused** - Anonymized data collection with IP hashing
+- **SQLite Database** - Lightweight analytics storage with efficient queries
+
 ## Technology Stack
 
 ### Frontend Architecture
@@ -63,6 +69,12 @@ AIBlogBoost is a frontend-only SPA that leverages Google Gemini AI to assist in 
 - **Client-side Processing** - No server required, complete privacy
 - **Export Services** - Browser-based file generation
 
+### Backend Analytics (Optional)
+- **Express.js** server with RESTful API endpoints
+- **SQLite** database for lightweight analytics storage
+- **Security Middleware** - CORS, helmet, rate limiting protection
+- **Privacy-First** - Anonymous usage tracking with data hashing
+
 ## Quick Start
 
 ### Prerequisites
@@ -71,6 +83,8 @@ AIBlogBoost is a frontend-only SPA that leverages Google Gemini AI to assist in 
 - Modern web browser
 
 ### Installation
+
+#### Frontend Only (Default)
 
 1. **Clone the repository**
    ```bash
@@ -97,6 +111,37 @@ AIBlogBoost is a frontend-only SPA that leverages Google Gemini AI to assist in 
    - Enter your Google Gemini API key
    - Start creating articles!
 
+#### With Analytics Backend (Optional)
+
+1. **Follow steps 1-2 above, then:**
+
+2. **Install backend dependencies**
+   ```bash
+   cd ../backend
+   npm install
+   ```
+
+3. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your settings
+   ```
+
+4. **Start both servers**
+   ```bash
+   # Terminal 1: Backend (port 3001)
+   cd backend
+   npm start
+   
+   # Terminal 2: Frontend (port 5173)
+   cd frontend
+   npm run dev
+   ```
+
+5. **Analytics will be available**
+   - Homepage statistics counter will show real data
+   - Admin dashboard: http://localhost:3001/admin
+
 ## Project Structure
 
 ```
@@ -112,7 +157,7 @@ AIBlogBoost/
 │   │   │   │   ├── DraftCombiner.vue     # Step 5: Content combination
 │   │   │   │   └── ExportView.vue        # Step 6: Export & save
 │   │   ├── views/            # Main application views
-│   │   │   ├── HomeView.vue              # Landing page
+│   │   │   ├── HomeView.vue              # Landing page with stats counter
 │   │   │   ├── CreateView.vue            # Article creation wizard
 │   │   │   ├── HistoryView.vue           # Article history management
 │   │   │   └── SettingsView.vue          # Configuration & preferences
@@ -122,12 +167,25 @@ AIBlogBoost/
 │   │   │   └── history.ts               # Article history management
 │   │   ├── services/         # Business logic & API integration
 │   │   │   ├── geminiService.ts         # Google Gemini API client
-│   │   │   └── exportService.ts         # File export functionality
+│   │   │   ├── exportService.ts         # File export functionality
+│   │   │   └── statsService.ts          # Analytics API client
 │   │   └── router/           # Vue Router configuration
+│   └── package.json
+├── backend/                  # Express.js analytics server (optional)
+│   ├── src/
+│   │   ├── routes/          # API route handlers
+│   │   │   └── stats.js                 # Statistics endpoints
+│   │   ├── utils/           # Utility functions
+│   │   │   └── initDatabase.js          # SQLite database setup
+│   │   ├── views/           # HTML templates
+│   │   │   └── admin.html               # Analytics dashboard
+│   │   └── server.js                    # Express server configuration
+│   ├── database/            # SQLite database storage
 │   └── package.json
 ├── docs/
 │   ├── README.md
-│   └── ROADMAP.md
+│   ├── ROADMAP.md
+│   └── ROADMAP_STATS.md     # Analytics implementation roadmap
 └── .gitignore
 ```
 
@@ -153,11 +211,23 @@ AIBlogBoost/
 ## Development
 
 ### Development Scripts
+
+#### Frontend
 ```bash
-npm run dev          # Start development server
+cd frontend
+npm run dev          # Start development server (port 5173)
 npm run build        # Build for production
 npm run preview      # Preview production build
 npm run type-check   # TypeScript type checking
+```
+
+#### Backend (Optional)
+```bash
+cd backend
+npm start            # Start analytics server (port 3001)
+npm run dev          # Start with nodemon for development
+npm run init-db      # Initialize SQLite database
+npm test             # Run tests
 ```
 
 ### Key Development Features
@@ -188,11 +258,11 @@ The application builds to static files and can be hosted on any static hosting s
 
 ## Architecture Decisions
 
-### Frontend-Only Design
-- **Privacy**: No user data sent to external servers
-- **Simplicity**: Single codebase with no backend complexity
-- **Cost-Effective**: No server infrastructure required
-- **Scalability**: CDN-based distribution for global performance
+### Hybrid Architecture Design
+- **Frontend-First**: Core functionality works standalone without backend
+- **Optional Analytics**: Backend provides usage insights while maintaining privacy
+- **Progressive Enhancement**: Analytics layer adds value without affecting core features
+- **Flexible Deployment**: Can be deployed frontend-only or with full-stack analytics
 
 ### Google Gemini Integration
 - **Quality**: High-quality Japanese content generation
@@ -255,12 +325,15 @@ For support and questions:
 - ✅ **User Interface**: Modern responsive design with dark/light themes
 - ✅ **Data Management**: Local storage with export capabilities
 - ✅ **Export Options**: Markdown, HTML, and text formats
+- ✅ **Analytics Backend**: Express.js server with SQLite database
+- ✅ **Usage Statistics**: Real-time homepage counter and admin dashboard
 
 ### Project Highlights
-- **Modern Stack**: Vue 3 + TypeScript + Tailwind CSS
-- **AI-Powered**: Google Gemini 1.5 Flash integration
-- **Privacy-First**: Frontend-only architecture
-- **Production-Ready**: Complete feature set with error handling
-- **Portfolio Quality**: Demonstrates advanced frontend development skills
+- **Full-Stack Architecture**: Vue 3 + TypeScript frontend with Express.js analytics backend
+- **AI-Powered**: Google Gemini 1.5 Flash integration with intelligent prompting
+- **Progressive Enhancement**: Works standalone or with optional analytics backend
+- **Privacy-Focused**: Anonymous analytics with client-side data control
+- **Production-Ready**: Complete feature set with comprehensive error handling
+- **Modern Development**: Demonstrates advanced full-stack development skills
 
-This project showcases expertise in modern web development, AI integration, and user experience design suitable for high-level freelance development projects.
+This project showcases expertise in modern web development, AI integration, backend analytics, and user experience design suitable for enterprise-level development projects.
